@@ -13,7 +13,7 @@ class Lexer
      * Lexer state.
      * @var array|string
      */
-    protected array|string $_lexerState;
+    protected array|string $_lexerState = 'default';
 
     /**
      * Text.
@@ -21,12 +21,13 @@ class Lexer
     protected ?string $_text = null;
 
     /**
-     * Tokens.
+     * @var array<string,array>
      */
     protected array $_tokens = [];
 
     /**
      * Namespace stacks.
+     * @var ?SplStack<string>
      */
     protected ?SplStack $_nsStack = null;
 
@@ -49,11 +50,11 @@ class Lexer
      * Text tokenizer: splits the text in parameter in an ordered array of tokens.
      *
      * @param string $text Text to tokenize.
-     * @param array $tokens Tokens to be returned.
-     * @return  Generator
-     * @throws  UnrecognizedTokenException
+     * @param array<string,array> $tokens Tokens to be returned.
+     * @return Generator
+     * @throws UnrecognizedTokenException
      */
-    public function lexMe($text, array $tokens)
+    public function lexMe(string $text, array $tokens): Generator
     {
         $this->_text = $text;
         $this->_tokens = $tokens;
@@ -67,7 +68,7 @@ class Lexer
             $_tokens = [];
 
             foreach ($tokens as $fullLexeme => $regex) {
-                if (false === strpos($fullLexeme, ':')) {
+                if (!str_contains($fullLexeme, ':')) {
                     $_tokens[$fullLexeme] = [$regex, null];
 
                     continue;
@@ -85,7 +86,10 @@ class Lexer
         }
 
         if (true == $stack) {
-            $this->_nsStack = new SplStack();
+            /**
+             * @psalm-suppress MixedPropertyTypeCoercion
+             */
+            $this->_nsStack = new SplStack;
         }
 
         while ($offset < $maxOffset) {
@@ -167,6 +171,9 @@ class Lexer
                         $shift = true;
                     }
 
+                    /**
+                     * @psalm-suppress MixedArrayOffset
+                     */
                     if (!isset($this->_tokens[$nextState])) {
                         $message = sprintf(
                             'Namespace %s does not exist, called by token %s ' .

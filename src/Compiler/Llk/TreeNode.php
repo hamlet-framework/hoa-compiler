@@ -67,6 +67,10 @@ class TreeNode implements Element
         return $this->_id;
     }
 
+    /**
+     * @param array<string> $value
+     * @return ?array<string>
+     */
     public function setValue(array $value): ?array
     {
         $old = $this->_value;

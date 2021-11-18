@@ -50,7 +50,7 @@ class Analyzer
     /**
      * RuleException name being analyzed.
      */
-    private ?string $_ruleName = null;
+    private string|int|null $_ruleName = null;
 
     /**
      * Parsed rules.
@@ -70,7 +70,7 @@ class Analyzer
     /**
      * Build the analyzer of the rules (does not analyze the rules).
      *
-     * @param array<string,mixed> $rules RuleException to be analyzed.
+     * @param array $rules RuleException to be analyzed.
      * @return  array|null
      * @throws  Exception
      */
@@ -91,7 +91,7 @@ class Analyzer
             $this->_ruleName = $key;
             $nodeId = null;
 
-            if ('#' === $key[0]) {
+            if (str_starts_with($key, '#')) {
                 $nodeId = $key;
                 $key = substr($key, 1);
             }
@@ -124,7 +124,7 @@ class Analyzer
     /**
      * Implementation of “rule”.
      */
-    protected function rule(?string &$pNodeId): mixed
+    protected function rule(?string &$pNodeId): string|int|null
     {
         return $this->choice($pNodeId);
     }
@@ -134,7 +134,7 @@ class Analyzer
      * @psalm-suppress PossiblyNullReference
      * @psalm-suppress PossiblyNullArrayAccess
      */
-    protected function choice(?string &$pNodeId): mixed
+    protected function choice(?string &$pNodeId): string|int|null
     {
         $children = [];
 
@@ -188,7 +188,7 @@ class Analyzer
     /**
      * Implementation of “concatenation”.
      */
-    protected function concatenation(?string &$pNodeId): mixed
+    protected function concatenation(?string &$pNodeId): string|int|null
     {
         $children = [];
 
@@ -228,7 +228,7 @@ class Analyzer
      * @psalm-suppress PossiblyNullReference
      * @psalm-suppress PossiblyUndefinedVariable
      */
-    protected function repetition(?string &$pNodeId): mixed
+    protected function repetition(?string &$pNodeId): string|int|null
     {
         // simple() …
         $children = $this->simple($pNodeId);
@@ -326,7 +326,7 @@ class Analyzer
      * @psalm-suppress PossiblyNullReference
      * @throws Exception
      */
-    protected function simple(?string &$pNodeId): mixed
+    protected function simple(?string &$pNodeId): string|int|null
     {
         if ('capturing_' === $this->_lexer->current()['token']) {
             $this->_lexer->next();

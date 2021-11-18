@@ -8,6 +8,7 @@ use Hoa\Compiler\Llk\Rules\Choice;
 use Hoa\Compiler\Llk\Rules\Concatenation;
 use Hoa\Compiler\Llk\Rules\Ekzit;
 use Hoa\Compiler\Llk\Rules\Entry;
+use Hoa\Compiler\Llk\Rules\Invocation;
 use Hoa\Compiler\Llk\Rules\Repetition;
 use Hoa\Compiler\Llk\Rules\Rule;
 use Hoa\Compiler\Llk\Rules\Token;
@@ -21,6 +22,7 @@ class Parser
 {
     /**
      * List of pragmas.
+     * @var array<string,mixed>
      */
     protected array $_pragmas;
 
@@ -31,11 +33,13 @@ class Parser
 
     /**
      * Associative array (token name => token regex), to be defined in precedence order.
+     * @var array<string,mixed>
      */
     protected array $_tokens;
 
     /**
-     * Rules, to be defined as associative array, name => RuleException object.
+     * Rules, to be defined as associative array, name => Rule object.
+     * @var array<Rule>
      */
     protected array $_rules;
 
@@ -56,6 +60,7 @@ class Parser
 
     /**
      * Stack of todo list.
+     * @var ?array<Invocation>
      */
     protected ?array $_todo = null;
 
@@ -72,9 +77,9 @@ class Parser
     /**
      * Construct the parser.
      *
-     * @param array $tokens Tokens.
-     * @param array $rules Rules.
-     * @param array $pragmas Pragmas.
+     * @param array<string,mixed> $tokens Tokens.
+     * @param array<string,Rule> $rules Rules.
+     * @param array<string,mixed> $pragmas Pragmas.
      */
     public function __construct(
         array $tokens = [],
@@ -92,12 +97,10 @@ class Parser
      * @param string $text Text to parse.
      * @param string|null $rule The axiom, i.e. root rule.
      * @param bool $tree Whether build tree or not.
-     * @return  mixed
-     * @throws  UnexpectedTokenException
-     * @psalm-suppress PossiblyNullArgument
-     * @psalm-suppress PossiblyNullArrayAccess
+     * @return TreeNode|bool|null
+     * @throws UnexpectedTokenException
      */
-    public function parse($text, string $rule = null, bool $tree = true)
+    public function parse(string $text, string $rule = null, bool $tree = true): TreeNode|bool|null
     {
         $k = 1024;
 
@@ -116,11 +119,9 @@ class Parser
         $this->_trace = [];
         $this->_todo = [];
 
-        if (false === array_key_exists($rule, $this->_rules)) {
+        if ($rule === null || false === array_key_exists($rule, $this->_rules)) {
             $rule = $this->getRootRule();
         }
-
-        // assert(is_string($rule));
 
         $closeRule = new Ekzit($rule, 0);
         $openRule = new Entry($rule, 0, [$closeRule]);
@@ -141,7 +142,7 @@ class Parser
                     $token = $this->_tokenSequence->current();
                 }
 
-                // assert($token !== null);
+                assert($token !== null);
 
                 $offset = $token['offset'];
                 $line = 1;
@@ -197,7 +198,7 @@ class Parser
      * Unfold trace.
      * @psalm-suppress PossiblyNullArgument
      */
-    protected function unfold(): mixed
+    protected function unfold(): ?bool
     {
         while (0 < count($this->_todo)) {
             $rule = array_pop($this->_todo);
@@ -212,6 +213,7 @@ class Parser
             } else {
                 $ruleName = $rule->getRule();
                 $next = $rule->getData();
+                assert($ruleName !== null);
                 $zeRule = $this->_rules[$ruleName];
                 $out = $this->_parse($zeRule, $next);
 
@@ -228,7 +230,7 @@ class Parser
      * Parse current rule.
      * @param Rule $zeRule Current rule.
      * @param int $next Next rule index.
-     * @return  bool
+     * @return bool
      * @psalm-suppress PossiblyNullReference
      * @psalm-suppress PossiblyNullArgument
      * @psalm-suppress PossiblyUndefinedVariable
@@ -278,6 +280,9 @@ class Parser
             $zzeRule->setValue($value);
             $zzeRule->setNamespace($namespace);
 
+            /**
+             * @psalm-suppress MixedArrayOffset
+             */
             if (isset($this->_tokens[$namespace][$name])) {
                 $zzeRule->setRepresentation($this->_tokens[$namespace][$name]);
             } else {
@@ -445,22 +450,20 @@ class Parser
      * Walk through the trace iteratively and recursively.
      *
      * @param int $i Current trace index.
-     * @param array    &$children Collected children.
+     * @param array &$children Collected children.
      * @return TreeNode|int
-     * @psalm-suppress PossiblyNullArrayOffset
-     * @psalm-suppress PossiblyInvalidOperand
-     * @psalm-suppress PossiblyInvalidArrayOffset
-     * @psalm-suppress ArgumentTypeCoercion
      */
     protected function _buildTree(int $i = 0, array &$children = []): TreeNode|int
     {
         $max = count($this->_trace);
 
         while ($i < $max) {
+            assert(is_int($i));
             $trace = $this->_trace[$i];
 
             if ($trace instanceof Entry) {
                 $ruleName = $trace->getRule();
+                assert($ruleName !== null);
                 $rule = $this->_rules[$ruleName];
                 $isRule = false === $trace->isTransitional();
                 $nextTrace = $this->_trace[$i + 1];
@@ -535,7 +538,7 @@ class Parser
 
                 foreach ($handle as $child) {
                     $child->setParent($cTree);
-                    // assert($child instanceof TreeNode);
+                    assert($child instanceof TreeNode);
                     $cTree->prependChild($child);
                 }
 
@@ -559,7 +562,9 @@ class Parser
             }
         }
 
-        return $children[0];
+        $first = $children[0];
+        assert($first instanceof TreeNode);
+        return $first;
     }
 
     /**

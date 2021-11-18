@@ -38,6 +38,7 @@ final class Buffer implements Iterator
     /**
      * @param Iterator<I,T> $iterator
      * @param int $bufferSize
+     * @psalm-suppress MixedPropertyTypeCoercion
      */
     public function __construct(private Iterator $iterator, int $bufferSize)
     {
@@ -55,6 +56,7 @@ final class Buffer implements Iterator
 
     /**
      * Get buffer.
+     * @return SplDoublyLinkedList<int,array{I,T}>
      */
     protected function getBuffer(): SplDoublyLinkedList
     {

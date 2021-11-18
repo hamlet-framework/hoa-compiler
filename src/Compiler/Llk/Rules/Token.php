@@ -88,7 +88,7 @@ class Token extends Rule
      * Get AST of the token representation.
      * @throws Compiler\Exceptions\UnexpectedTokenException
      */
-    public function getAST(): ?TreeNode
+    public function getAST(): TreeNode|bool|null
     {
         if (null === static::$_regexCompiler) {
             static::$_regexCompiler = Compiler\Llk\Llk::load(__DIR__ . '/../../../Grammars/Regex.pp');
@@ -97,7 +97,9 @@ class Token extends Rule
         if (null === $this->_ast) {
             $representation = $this->getRepresentation();
             assert($representation !== null);
-            $this->_ast = static::$_regexCompiler->parse($representation);
+            $ast = static::$_regexCompiler->parse($representation);
+            assert($ast instanceof TreeNode);
+            $this->_ast = $ast;
         }
 
         return $this->_ast;

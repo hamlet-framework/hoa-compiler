@@ -14,23 +14,17 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
-        <DocblockTypeContradiction errorLevel="suppress"/>
         <MixedAssignment errorLevel="suppress"/>
         <MixedArgument errorLevel="suppress"/>
         <MixedArgumentTypeCoercion errorLevel="suppress"/>
         <MixedArrayAccess errorLevel="suppress"/>
         <MixedArrayAssignment errorLevel="suppress"/>
-        <MixedArrayOffset errorLevel="suppress"/>
         <MixedArrayTypeCoercion errorLevel="suppress"/>
-        <MixedFunctionCall errorLevel="suppress"/>
         <MixedInferredReturnType errorLevel="suppress"/>
         <MixedMethodCall errorLevel="suppress"/>
         <MixedOperand errorLevel="suppress"/>
-        <MixedPropertyTypeCoercion errorLevel="suppress"/>
-        <MixedReturnStatement errorLevel="suppress"/>
         <MixedReturnTypeCoercion errorLevel="suppress"/>
         <PossiblyNullOperand errorLevel="suppress"/>
-        <PropertyNotSetInConstructor errorLevel="suppress"/>
         <RedundantCastGivenDocblockType errorLevel="suppress"/>
         <RedundantCondition errorLevel="suppress"/>
     </issueHandlers>

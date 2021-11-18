@@ -43,7 +43,7 @@ class Dump implements Visit
         return $out;
     }
 
-    protected function dumpData(mixed $data): ?string
+    protected function dumpData(string|array|null $data): ?string
     {
         if (!is_array($data)) {
             return $data;
