@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="1"
+    resolveFromConfigFile="true"
+    findUnusedPsalmSuppress="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <directory name="src" />
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+    <issueHandlers>
+        <DocblockTypeContradiction errorLevel="suppress"/>
+        <MixedAssignment errorLevel="suppress"/>
+        <MixedArgument errorLevel="suppress"/>
+        <MixedArgumentTypeCoercion errorLevel="suppress"/>
+        <MixedArrayAccess errorLevel="suppress"/>
+        <MixedArrayAssignment errorLevel="suppress"/>
+        <MixedArrayOffset errorLevel="suppress"/>
+        <MixedArrayTypeCoercion errorLevel="suppress"/>
+        <MixedFunctionCall errorLevel="suppress"/>
+        <MixedInferredReturnType errorLevel="suppress"/>
+        <MixedMethodCall errorLevel="suppress"/>
+        <MixedOperand errorLevel="suppress"/>
+        <MixedPropertyTypeCoercion errorLevel="suppress"/>
+        <MixedReturnStatement errorLevel="suppress"/>
+        <MixedReturnTypeCoercion errorLevel="suppress"/>
+        <PossiblyNullOperand errorLevel="suppress"/>
+        <PropertyNotSetInConstructor errorLevel="suppress"/>
+        <RedundantCastGivenDocblockType errorLevel="suppress"/>
+        <RedundantCondition errorLevel="suppress"/>
+    </issueHandlers>
+</psalm>
