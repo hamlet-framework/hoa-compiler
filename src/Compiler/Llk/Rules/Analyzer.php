@@ -146,7 +146,7 @@ class Analyzer
             return null;
         }
 
-        if (null !== $nNodeId ) { // && $this->_parsedRules
+        if (null !== $nNodeId) { // && $this->_parsedRules
             $this->_parsedRules[$rule]->setNodeId($nNodeId);
         }
 

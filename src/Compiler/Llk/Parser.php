@@ -80,8 +80,7 @@ class Parser
         array $tokens = [],
         array $rules = [],
         array $pragmas = []
-    )
-    {
+    ) {
         $this->_tokens = $tokens;
         $this->_rules = $rules;
         $this->_pragmas = $pragmas;
@@ -165,12 +164,15 @@ class Parser
                     }
                 }
 
-                $message = sprintf('Unexpected token "%s" (%s) at line %d and column %d:' .
-                    "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑', $token ? $token['value'] : '',
+                $message = sprintf(
+                    'Unexpected token "%s" (%s) at line %d and column %d:' .
+                    "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
+                    $token ? $token['value'] : '',
                     $token ? $token['token'] : '',
                     $line,
                     $column,
-                    $text);
+                    $text
+                );
                 throw new UnexpectedTokenException($message, 0, $line, $column);
             }
         } while (true);
@@ -635,7 +637,6 @@ class Parser
         foreach ($newNode->getChildren() as $child) {
             $this->mergeTreeRecursive($last, $child);
         }
-
     }
 
     /**

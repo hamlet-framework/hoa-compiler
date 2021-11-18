@@ -274,10 +274,13 @@ abstract class Llk
 
                     $tokens[$matches[1]][$matches[2]] = $matches[3];
                 } else {
-                    $message = sprintf('Unrecognized instructions:' . "\n" .
-                        '    %s' . "\n" . 'in file %s at line %d.', $line,
+                    $message = sprintf(
+                        'Unrecognized instructions:' . "\n" .
+                        '    %s' . "\n" . 'in file %s at line %d.',
+                        $line,
                         $streamName,
-                        $i + 1);
+                        $i + 1
+                    );
                     throw new Exception($message, 1);
                 }
 

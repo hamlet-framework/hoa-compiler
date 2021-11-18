@@ -122,7 +122,6 @@ final class Buffer implements Iterator
     public function previous(): void
     {
         $this->getBuffer()->prev();
-
     }
 
     /**

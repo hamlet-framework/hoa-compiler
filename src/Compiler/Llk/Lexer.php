@@ -92,11 +92,14 @@ class Lexer
             $nextToken = $this->nextToken($offset);
 
             if (null === $nextToken) {
-                $message = sprintf('Unrecognized token "%s" at line 1 and column %d:' .
+                $message = sprintf(
+                    'Unrecognized token "%s" at line 1 and column %d:' .
                     "\n" . '%s' . "\n" .
-                    str_repeat(' ', mb_strlen(substr($text, 0, $offset))) . '↑', mb_substr(substr($text, $offset), 0, 1),
+                    str_repeat(' ', mb_strlen(substr($text, 0, $offset))) . '↑',
+                    mb_substr(substr($text, $offset), 0, 1),
                     $offset + 1,
-                    $text);
+                    $text
+                );
                 throw new UnrecognizedTokenException($message, 0, 1, $offset);
             }
 
@@ -165,10 +168,13 @@ class Lexer
                     }
 
                     if (!isset($this->_tokens[$nextState])) {
-                        $message = sprintf('Namespace %s does not exist, called by token %s ' .
-                            'in namespace %s.', $nextState ?? 'unknown',
+                        $message = sprintf(
+                            'Namespace %s does not exist, called by token %s ' .
+                            'in namespace %s.',
+                            $nextState ?? 'unknown',
                             $lexeme,
-                            $this->_lexerState);
+                            $this->_lexerState
+                        );
                         throw new Compiler\Exceptions\LexerException($message, 2);
                     }
 
