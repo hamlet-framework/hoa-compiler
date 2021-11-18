@@ -17,11 +17,11 @@
     },
     {
       "name": "Hoa community",
-      "homepage": "https://hoa-project.net/"
+      "homepage": "https://github.com/hoaproject/"
     },
     {
       "name": "Vasily Kartashov",
-      "homepage": "hamlet@kartashov.com"
+      "email": "hamlet@kartashov.com"
     }
   ],
   "require": {
