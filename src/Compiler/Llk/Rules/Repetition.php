@@ -9,12 +9,12 @@ class Repetition extends Rule
     /**
      * Minimum bound.
      */
-    protected int $_min = 0;
+    protected int $min = 0;
 
     /**
      * Maximum bound.
      */
-    protected int $_max = 0;
+    protected int $max = 0;
 
     /**
      * @param string|int $name
@@ -34,8 +34,8 @@ class Repetition extends Rule
             throw new Compiler\Exceptions\RuleException($message);
         }
 
-        $this->_min = $min;
-        $this->_max = $max;
+        $this->min = $min;
+        $this->max = $max;
     }
 
     /**
@@ -43,7 +43,7 @@ class Repetition extends Rule
      */
     public function getMin(): int
     {
-        return $this->_min;
+        return $this->min;
     }
 
     /**
@@ -51,7 +51,7 @@ class Repetition extends Rule
      */
     public function getMax(): int
     {
-        return $this->_max;
+        return $this->max;
     }
 
     /**

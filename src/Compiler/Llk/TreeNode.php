@@ -8,12 +8,8 @@ use Hoa\Compiler\Visitor\Visit;
 /**
  * @implements Element<TreeNode,string>
  */
-class TreeNode implements Element
+final class TreeNode implements Element
 {
-    /**
-     * ID (should be something like #ruleName or token).
-     */
-    protected string $_id;
 
     /**
      * Value of the node (non-null for token nodes).
@@ -38,14 +34,13 @@ class TreeNode implements Element
     protected array $_data = [];
 
     /**
-     * @param string $id
+     * @param string $id Should be something like #ruleName or token
      * @param ?array<string,?string> $value
      * @param array<TreeNode> $children
      * @param ?TreeNode $parent
      */
-    public function __construct(string $id, ?array $value = null, array $children = [], ?TreeNode $parent = null)
+    public function __construct(private string $id, ?array $value = null, array $children = [], ?TreeNode $parent = null)
     {
-        $this->_id = $id;
         if (!empty($value)) {
             $this->_value = $value;
         }
@@ -57,14 +52,14 @@ class TreeNode implements Element
 
     public function setId(string $id): string
     {
-        $old = $this->_id;
-        $this->_id = $id;
+        $old = $this->id;
+        $this->id = $id;
         return $old;
     }
 
     public function getId(): string
     {
-        return $this->_id;
+        return $this->id;
     }
 
     /**

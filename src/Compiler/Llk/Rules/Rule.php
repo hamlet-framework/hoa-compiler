@@ -5,69 +5,64 @@ namespace Hoa\Compiler\Llk\Rules;
 abstract class Rule
 {
     /**
-     * RuleException name.
-     */
-    protected string|int $_name;
-
-    /**
      * RuleException's children. Can be an array of names or a single name.
      * @var array<Rule|Invocation|string|int>|string|int|null
      */
-    protected array|string|int|null $_children;
+    protected array|string|int|null $children;
 
     /**
      * Node ID.
      */
-    protected ?string $_nodeId = null;
+    protected ?string $nodeId = null;
 
     /**
      * Node options.
+     * @var array<string>
      */
-    protected array $_nodeOptions = [];
+    protected array $nodeOptions = [];
 
     /**
      * Default ID.
      */
-    protected ?string $_defaultId = null;
+    protected ?string $defaultId = null;
 
     /**
      * Default options.
      * @var array<string>
      */
-    protected array $_defaultOptions = [];
+    protected array $defaultOptions = [];
 
     /**
      * For non-transitional rule: PP representation.
      */
-    protected ?string $_pp = null;
+    protected ?string $pp = null;
 
     /**
      * Whether the rule is transitional or not (i.e. not declared in the grammar but created by the analyzer).
      */
-    protected bool $_transitional = true;
+    protected bool $transitional = true;
 
     /**
      * @param string|int $name
      * @param array<Rule|Invocation|string|int>|string|int|null $children
      * @param string|null $nodeId
      */
-    public function __construct(string|int $name, array|string|int|null $children, string|null $nodeId = null)
+    public function __construct(protected string|int $name, array|string|int|null $children, string|null $nodeId = null)
     {
-        $this->_name = $name;
-        $this->_children = $children;
+        $this->children = $children;
         $this->setNodeId($nodeId);
     }
 
     public function setName(string $name): string|int
     {
-        $old = $this->_name;
-        $this->_name = $name;
+        $old = $this->name;
+        $this->name = $name;
         return $old;
     }
 
     public function getName(): string|int
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -77,8 +72,8 @@ abstract class Rule
      */
     protected function setChildren(array|string|int $children): array|string|int|null
     {
-        $old = $this->_children;
-        $this->_children = $children;
+        $old = $this->children;
+        $this->children = $children;
         return $old;
     }
 
@@ -87,19 +82,19 @@ abstract class Rule
      */
     public function getChildren(): array|string|int|null
     {
-        return $this->_children;
+        return $this->children;
     }
 
     public function setNodeId(?string $nodeId): ?string
     {
-        $old = $this->_nodeId;
+        $old = $this->nodeId;
 
         if ($nodeId && false !== $pos = strpos($nodeId, ':')) {
-            $this->_nodeId = substr($nodeId, 0, $pos);
-            $this->_nodeOptions = str_split(substr($nodeId, $pos + 1));
+            $this->nodeId = substr($nodeId, 0, $pos);
+            $this->nodeOptions = str_split(substr($nodeId, $pos + 1));
         } else {
-            $this->_nodeId = $nodeId;
-            $this->_nodeOptions = [];
+            $this->nodeId = $nodeId;
+            $this->nodeOptions = [];
         }
 
         return $old;
@@ -107,24 +102,24 @@ abstract class Rule
 
     public function getNodeId(): ?string
     {
-        return $this->_nodeId;
+        return $this->nodeId;
     }
 
     public function getNodeOptions(): array
     {
-        return $this->_nodeOptions;
+        return $this->nodeOptions;
     }
 
     public function setDefaultId(string $defaultId): ?string
     {
-        $old = $this->_defaultId;
+        $old = $this->defaultId;
 
         if (false !== $pos = strpos($defaultId, ':')) {
-            $this->_defaultId = substr($defaultId, 0, $pos);
-            $this->_defaultOptions = str_split(substr($defaultId, $pos + 1));
+            $this->defaultId = substr($defaultId, 0, $pos);
+            $this->defaultOptions = str_split(substr($defaultId, $pos + 1));
         } else {
-            $this->_defaultId = $defaultId;
-            $this->_defaultOptions = [];
+            $this->defaultId = $defaultId;
+            $this->defaultOptions = [];
         }
 
         return $old;
@@ -132,7 +127,7 @@ abstract class Rule
 
     public function getDefaultId(): ?string
     {
-        return $this->_defaultId;
+        return $this->defaultId;
     }
 
     /**
@@ -140,24 +135,24 @@ abstract class Rule
      */
     public function getDefaultOptions(): array
     {
-        return $this->_defaultOptions;
+        return $this->defaultOptions;
     }
 
     public function setPPRepresentation(string $pp): ?string
     {
-        $old = $this->_pp;
-        $this->_pp = $pp;
-        $this->_transitional = false;
+        $old = $this->pp;
+        $this->pp = $pp;
+        $this->transitional = false;
         return $old;
     }
 
     public function getPPRepresentation(): ?string
     {
-        return $this->_pp;
+        return $this->pp;
     }
 
     public function isTransitional(): bool
     {
-        return $this->_transitional;
+        return $this->transitional;
     }
 }

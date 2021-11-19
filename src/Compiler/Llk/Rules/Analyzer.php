@@ -6,29 +6,29 @@ use Hoa\Compiler;
 use Hoa\Compiler\Exceptions\Exception;
 use Hoa\Iterator\Lookahead;
 
-class Analyzer
+final class Analyzer
 {
     /**
      * PP lexemes.
-     * @var array<string,array<string,string>>
+     * @var array{default:array<string,string>}
      */
     protected static array $_ppLexemes = [
         'default' => [
-            'skip' => '\s',
-            'or' => '\|',
-            'zero_or_one' => '\?',
-            'one_or_more' => '\+',
+            'skip'         => '\s',
+            'or'           => '\|',
+            'zero_or_one'  => '\?',
+            'one_or_more'  => '\+',
             'zero_or_more' => '\*',
-            'n_to_m' => '\{[0-9]+,[0-9]+\}',
-            'zero_to_m' => '\{,[0-9]+\}',
-            'n_or_more' => '\{[0-9]+,\}',
-            'exactly_n' => '\{[0-9]+\}',
-            'skipped' => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
-            'kept' => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?>',
-            'named' => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
-            'node' => '#[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?',
-            'capturing_' => '\(',
-            '_capturing' => '\)'
+            'n_to_m'       => '\{[0-9]+,[0-9]+\}',
+            'zero_to_m'    => '\{,[0-9]+\}',
+            'n_or_more'    => '\{[0-9]+,\}',
+            'exactly_n'    => '\{[0-9]+\}',
+            'skipped'      => '::[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?::',
+            'kept'         => '<[a-zA-Z_][a-zA-Z0-9_]*(\[\d+\])?>',
+            'named'        => '[a-zA-Z_][a-zA-Z0-9_]*\(\)',
+            'node'         => '#[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?',
+            'capturing_'   => '\(',
+            '_capturing'   => '\)',
         ]
     ];
 
@@ -36,11 +36,6 @@ class Analyzer
      * Lexer iterator.
      */
     protected ?Lookahead $_lexer = null;
-
-    /**
-     * Tokens representing rules.
-     */
-    protected ?array $_tokens = null;
 
     /**
      * Rules.
@@ -64,9 +59,11 @@ class Analyzer
      */
     protected int $_transitionalRuleCounter = 0;
 
-    public function __construct(array $tokens)
+    /**
+     * @param array<string,array<string>> $tokens Tokens representing rules.
+     */
+    public function __construct(private array $tokens)
     {
-        $this->_tokens = $tokens;
     }
 
     /**
@@ -340,7 +337,6 @@ class Analyzer
      * @psalm-suppress PossiblyNullReference
      * @psalm-suppress MixedArrayAccess
      * @psalm-suppress MixedArgument
-     * @psalm-suppress MixedAssignment
      * @throws Exception
      */
     protected function simple(?string &$pNodeId): string|int|null
@@ -374,7 +370,7 @@ class Analyzer
 
             $exists = false;
 
-            foreach ($this->_tokens ?? [] as $tokens) {
+            foreach ($this->tokens as $tokens) {
                 foreach ($tokens as $token => $_) {
                     assert(is_string($token));
                     if ($token === $tokenName ||
@@ -410,7 +406,7 @@ class Analyzer
 
             $exists = false;
 
-            foreach ($this->_tokens ?? [] as $tokens) {
+            foreach ($this->tokens as $tokens) {
                 foreach ($tokens as $token => $_) {
                     assert(is_string($token));
                     if ($token === $tokenName ||

@@ -3,41 +3,31 @@
 namespace Hoa\Compiler\Llk\Rules;
 
 use Hoa\Compiler;
+use Hoa\Compiler\Exceptions\Exception;
+use Hoa\Compiler\Llk\Llk;
 use Hoa\Compiler\Llk\Parser;
 use Hoa\Compiler\Llk\TreeNode;
 
-class Token extends Rule
+final class Token extends Rule
 {
     /**
      * LL(k) compiler of hoa://Library/Regex/Regex.pp.
      */
-    protected static ?Parser $_regexCompiler = null;
+    protected static ?Parser $regexCompiler = null;
 
-    protected string $_tokenName;
+    protected ?string $namespace = null;
 
-    protected ?string $_namespace = null;
-
-    protected ?string $_regex = null;
+    protected ?string $regex = null;
 
     /**
      * AST of the regex.
      */
-    protected ?TreeNode $_ast = null;
+    protected ?TreeNode $ast = null;
 
     /**
      * Token value.
      */
-    protected ?string $_value = null;
-
-    /**
-     * Whether the token is kept or not in the AST.
-     */
-    protected bool $_kept = false;
-
-    /**
-     * Unification index.
-     */
-    protected int $_unification = -1;
+    protected ?string $value = null;
 
     /**
      * @param string|int $name Name.
@@ -46,69 +36,69 @@ class Token extends Rule
      * @param int $unification Unification index.
      * @param bool $kept Whether the token is kept or not in the AST.
      */
-    public function __construct(string|int $name, string $tokenName, ?string $nodeId, int $unification, bool $kept = false)
-    {
+    public function __construct(
+        string|int $name,
+        protected string $tokenName,
+        ?string $nodeId,
+        protected int $unification,
+        protected bool $kept = false
+    ) {
         parent::__construct($name, [], $nodeId);
-
-        $this->_tokenName = $tokenName;
-        $this->_unification = $unification;
-        $this->_kept = $kept;
     }
 
     public function getTokenName(): string
     {
-        return $this->_tokenName;
+        return $this->tokenName;
     }
 
     public function setNamespace(string $namespace): ?string
     {
-        $old = $this->_namespace;
-        $this->_namespace = $namespace;
+        $old = $this->namespace;
+        $this->namespace = $namespace;
         return $old;
     }
 
     public function getNamespace(): ?string
     {
-        return $this->_namespace;
+        return $this->namespace;
     }
 
     public function setRepresentation(string $regex): ?string
     {
-        $old = $this->_regex;
-        $this->_regex = $regex;
+        $old = $this->regex;
+        $this->regex = $regex;
         return $old;
     }
 
-    public function getRepresentation(): ?string
+    public function getRepresentation(): string
     {
-        return $this->_regex;
+        if (!$this->regex) {
+            throw new Exception('Not initialized.');
+        }
+        return $this->regex;
     }
 
     /**
      * Get AST of the token representation.
-     * @throws Compiler\Exceptions\UnexpectedTokenException
      */
-    public function getAST(): TreeNode|bool|null
+    public function getAST(): TreeNode
     {
-        if (null === static::$_regexCompiler) {
-            static::$_regexCompiler = Compiler\Llk\Llk::load(__DIR__ . '/../../../Grammars/Regex.pp');
+        if (!Token::$regexCompiler) {
+            Token::$regexCompiler = Llk::load(__DIR__ . '/../../../Grammars/Regex.pp');
         }
-
-        if (null === $this->_ast) {
-            $representation = $this->getRepresentation();
-            assert($representation !== null);
-            $ast = static::$_regexCompiler->parse($representation);
-            assert($ast instanceof TreeNode);
-            $this->_ast = $ast;
+        if (!$this->ast) {
+            if (!$this->regex) {
+                throw new Exception('Not initialized.');
+            }
+            $this->ast = Token::$regexCompiler->parse($this->regex);
         }
-
-        return $this->_ast;
+        return $this->ast;
     }
 
     public function setValue(string $value): ?string
     {
-        $old = $this->_value;
-        $this->_value = $value;
+        $old = $this->value;
+        $this->value = $value;
         return $old;
     }
 
@@ -117,7 +107,7 @@ class Token extends Rule
      */
     public function getValue(): ?string
     {
-        return $this->_value;
+        return $this->value;
     }
 
     /**
@@ -125,8 +115,8 @@ class Token extends Rule
      */
     public function setKept(bool $kept): bool
     {
-        $old = $this->_kept;
-        $this->_kept = $kept;
+        $old = $this->kept;
+        $this->kept = $kept;
         return $old;
     }
 
@@ -135,11 +125,11 @@ class Token extends Rule
      */
     public function isKept(): bool
     {
-        return $this->_kept;
+        return $this->kept;
     }
 
     public function getUnificationIndex(): int
     {
-        return $this->_unification;
+        return $this->unification;
     }
 }

@@ -87,8 +87,7 @@ class Parser
         array $tokens = [],
         array $rules = [],
         array $pragmas = []
-    )
-    {
+    ) {
         $this->_tokens = $tokens;
         $this->_rules = $rules;
         $this->_pragmas = $pragmas;
@@ -100,12 +99,12 @@ class Parser
      * @param string $text Text to parse.
      * @param string|null $rule The axiom, i.e. root rule.
      * @param bool $tree Whether build tree or not.
-     * @return TreeNode|bool|null
+     * @return TreeNode
      * @throws UnexpectedTokenException
      * @psalm-suppress MixedArrayAccess
      * @psalm-suppress MixedAssignment
      */
-    public function parse(string $text, string $rule = null, bool $tree = true): TreeNode|bool|null
+    public function parse(string $text, string $rule = null, bool $tree = true): TreeNode
     {
         $k = 1024;
 
@@ -187,7 +186,7 @@ class Parser
         } while (true);
 
         if (false === $tree) {
-            return true;
+            throw new RuntimeException('Should never happen.');
         }
 
         $tree = $this->_buildTree();
@@ -433,15 +432,9 @@ class Parser
             $last = array_pop($this->_trace);
 
             if ($last instanceof Entry) {
-                /**
-                 * @psalm-suppress PossiblyNullArrayOffset
-                 */
                 $zeRule = $this->_rules[$last->getRule()];
                 $found = $zeRule instanceof Choice;
             } elseif ($last instanceof Ekzit) {
-                /**
-                 * @psalm-suppress PossiblyNullArrayOffset
-                 */
                 $zeRule = $this->_rules[$last->getRule()];
                 $found = $zeRule instanceof Repetition;
             } elseif ($last instanceof Token) {
