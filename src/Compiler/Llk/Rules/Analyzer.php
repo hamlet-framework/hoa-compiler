@@ -44,6 +44,7 @@ class Analyzer
 
     /**
      * Rules.
+     * @var array<string,string>
      */
     protected ?array $_rules = null;
 
@@ -54,6 +55,7 @@ class Analyzer
 
     /**
      * Parsed rules.
+     * @var array<Rule>
      */
     protected ?array $_parsedRules = null;
 
@@ -70,16 +72,19 @@ class Analyzer
     /**
      * Build the analyzer of the rules (does not analyze the rules).
      *
-     * @param array $rules RuleException to be analyzed.
-     * @return  array|null
-     * @throws  Exception
+     * @param array<string,string> $rules Rules to be analyzed.
+     * @return array<Rule>
+     * @throws Exception
      */
-    public function analyzeRules(array $rules): array|null
+    public function analyzeRules(array $rules): array
     {
         if (empty($rules)) {
             throw new Compiler\Exceptions\RuleException('No rules specified!', 0);
         }
 
+        /**
+         * @var array<Rule>
+         */
         $this->_parsedRules = [];
         $this->_rules = $rules;
         $lexer = new Compiler\Llk\Lexer();
@@ -133,6 +138,7 @@ class Analyzer
      * Implementation of “choice”.
      * @psalm-suppress PossiblyNullReference
      * @psalm-suppress PossiblyNullArrayAccess
+     * @psalm-suppress MixedArrayAccess
      */
     protected function choice(?string &$pNodeId): string|int|null
     {
@@ -226,7 +232,10 @@ class Analyzer
      * Implementation of “repetition”.
      * @throws Exception
      * @psalm-suppress PossiblyNullReference
-     * @psalm-suppress PossiblyUndefinedVariable
+     * @psalm-suppress MixedArrayAccess
+     * @psalm-suppress UnusedVariable
+     * @psalm-suppress MixedArgument
+     * @psalm-suppress MixedAssignment
      */
     protected function repetition(?string &$pNodeId): string|int|null
     {
@@ -302,6 +311,11 @@ class Analyzer
             return $children;
         }
 
+        /**
+         * @var int $min
+         * @var int $max
+         */
+
         if (-1 != $max && $max < $min) {
             $message = sprintf('Upper bound %d must be greater or equal to lower bound %d in rule %s.', $max, $min, $this->_ruleName ?? 'unknown');
             throw new Exception($message, 2);
@@ -324,6 +338,9 @@ class Analyzer
      * @psalm-suppress PossiblyFalseArgument
      * @psalm-suppress PossiblyFalseOperand
      * @psalm-suppress PossiblyNullReference
+     * @psalm-suppress MixedArrayAccess
+     * @psalm-suppress MixedArgument
+     * @psalm-suppress MixedAssignment
      * @throws Exception
      */
     protected function simple(?string &$pNodeId): string|int|null
@@ -359,6 +376,7 @@ class Analyzer
 
             foreach ($this->_tokens ?? [] as $tokens) {
                 foreach ($tokens as $token => $_) {
+                    assert(is_string($token));
                     if ($token === $tokenName ||
                         str_contains($token, ':') && substr($token, 0, strpos($token, ':')) === $tokenName) {
                         $exists = true;
@@ -394,6 +412,7 @@ class Analyzer
 
             foreach ($this->_tokens ?? [] as $tokens) {
                 foreach ($tokens as $token => $_) {
+                    assert(is_string($token));
                     if ($token === $tokenName ||
                         str_contains($token, ':') && substr($token, 0, strpos($token, ':')) === $tokenName) {
                         $exists = true;

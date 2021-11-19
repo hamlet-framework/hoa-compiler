@@ -17,6 +17,7 @@ class Dump implements Visit
     /**
      * @param TreeNode $element
      * @return string
+     * @psalm-suppress PossiblyNullOperand
      */
     public function visit(Element $element): string
     {
@@ -43,12 +44,18 @@ class Dump implements Visit
         return $out;
     }
 
-    protected function dumpData(string|array|null $data): ?string
+    /**
+     * @param string|array $data
+     * @return string
+     * @psalm-suppress MixedArgument
+     * @psalm-suppress MixedAssignment
+     */
+    protected function dumpData(string|array $data): string
     {
         if (!is_array($data)) {
             return $data;
         }
-        $out = null;
+        $out = '';
         foreach ($data as $key => $value) {
             $out .= '[' . $key . ' => ' . $this->dumpData($value) . ']';
         }

@@ -16,7 +16,14 @@ class Repetition extends Rule
      */
     protected int $_max = 0;
 
-    public function __construct(string|int $name, int $min, int $max, mixed $children, ?string $nodeId)
+    /**
+     * @param string|int $name
+     * @param int $min
+     * @param int $max
+     * @param array<Rule|Invocation|string>|string|int $children
+     * @param string|null $nodeId
+     */
+    public function __construct(string|int $name, int $min, int $max, array|string|int $children, ?string $nodeId)
     {
         parent::__construct($name, $children, $nodeId);
         $min = max(0, $min);

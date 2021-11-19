@@ -4,6 +4,7 @@ namespace Hoa\Compiler\Llk;
 
 use Hoa\Compiler;
 use Hoa\Compiler\Exceptions\Exception;
+use Hoa\Compiler\Llk\Rules\Rule;
 
 abstract class Llk
 {
@@ -24,13 +25,16 @@ abstract class Llk
             throw new Exception($message . '.', 0);
         }
 
-        /**
-         * @psalm-suppress NullReference
-         */
+        $tokens = [];
+        $rawRules = [];
+        $pragmas = [];
         static::parsePP($pp, $tokens, $rawRules, $pragmas, $path);
 
         $ruleAnalyzer = new Rules\Analyzer($tokens);
-        $rules        = $ruleAnalyzer->analyzeRules($rawRules);
+        /**
+         * @psalm-suppress InvalidArgument
+         */
+        $rules = $ruleAnalyzer->analyzeRules($rawRules);
 
         assert($rules !== null);
 
@@ -43,16 +47,17 @@ abstract class Llk
      * will be reset. The parser will be saved as a class, named after
      * `$className`. To retrieve the parser, one must instanciate this class.
      *
-     * @param Parser $parser       Parser to save.
-     * @param string $className    Parser classname.
-     * @return  string
+     * @param Parser $parser Parser to save.
+     * @param string $className Parser classname.
+     * @return string
+     * @psalm-suppress PossiblyNullOperand
      */
     public static function save(Parser $parser, string $className): string
     {
-        $outTokens  = null;
-        $outRules   = null;
+        $outTokens = null;
+        $outRules = null;
         $outPragmas = null;
-        $outExtra   = null;
+        $outExtra = null;
 
         $escapeRuleName = function (string|int $ruleName) use ($parser): string|int {
             if (true == $parser->getRule($ruleName)?->isTransitional()) {
@@ -104,6 +109,9 @@ abstract class Llk
                 } elseif (false === is_array($ruleChildren)) {
                     $arguments['children'] = $escapeRuleName($ruleChildren);
                 } else {
+                    /**
+                     * @psalm-suppress PossiblyInvalidArgument
+                     */
                     $arguments['children'] =
                         '[' .
                         implode(', ', array_map($escapeRuleName, $ruleChildren)) .
@@ -197,20 +205,21 @@ abstract class Llk
     /**
      * Parse the grammar description language.
      *
-     * @param   string  $pp            Grammar description.
-     * @param   array   $tokens        Extracted tokens.
-     * @param   array   $rules         Extracted raw rules.
-     * @param   array   $pragmas       Extracted raw pragmas.
-     * @param   string  $streamName    The name of the stream containing the grammar.
-     * @return  void
-     * @throws  Exception
+     * @param string $pp Grammar description.
+     * @param array<string,array<string>> $tokens Extracted tokens.
+     * @param array<string,?string> $rules Extracted raw rules.
+     * @param array<string,string|int|bool> $pragmas Extracted raw pragmas.
+     * @param string $streamName The name of the stream containing the grammar.
+     * @return void
+     * @throws Exception
+     * @psalm-suppress PossiblyNullOperand
      */
-    public static function parsePP($pp, &$tokens, &$rules, &$pragmas, $streamName)
+    public static function parsePP(string $pp, array &$tokens, array &$rules, array &$pragmas, string $streamName): void
     {
-        $lines   = explode("\n", $pp);
+        $lines = explode("\n", $pp);
         $pragmas = [];
-        $tokens  = ['default' => []];
-        $rules   = [];
+        $tokens = ['default' => []];
+        $rules = [];
 
         for ($i = 0, $m = count($lines); $i < $m; ++$i) {
             $line = rtrim($lines[$i]);
@@ -288,12 +297,12 @@ abstract class Llk
             }
 
             $ruleName = substr($line, 0, -1);
-            $rule     = null;
+            $rule = null;
             ++$i;
 
             while ($i < $m &&
                 isset($lines[$i][0]) &&
-                (' '  === $lines[$i][0] ||
+                (' ' === $lines[$i][0] ||
                     "\t" === $lines[$i][0] ||
                     '//' === substr($lines[$i], 0, 2))) {
                 if ('//' === substr($lines[$i], 0, 2)) {

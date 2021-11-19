@@ -14,17 +14,6 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
-        <MixedAssignment errorLevel="suppress"/>
-        <MixedArgument errorLevel="suppress"/>
-        <MixedArgumentTypeCoercion errorLevel="suppress"/>
-        <MixedArrayAccess errorLevel="suppress"/>
-        <MixedArrayAssignment errorLevel="suppress"/>
-        <MixedArrayTypeCoercion errorLevel="suppress"/>
-        <MixedInferredReturnType errorLevel="suppress"/>
-        <MixedMethodCall errorLevel="suppress"/>
-        <MixedOperand errorLevel="suppress"/>
-        <MixedReturnTypeCoercion errorLevel="suppress"/>
-        <PossiblyNullOperand errorLevel="suppress"/>
         <RedundantCastGivenDocblockType errorLevel="suppress"/>
         <RedundantCondition errorLevel="suppress"/>
     </issueHandlers>

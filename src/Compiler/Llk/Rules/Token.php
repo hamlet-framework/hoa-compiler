@@ -48,7 +48,7 @@ class Token extends Rule
      */
     public function __construct(string|int $name, string $tokenName, ?string $nodeId, int $unification, bool $kept = false)
     {
-        parent::__construct($name, null, $nodeId);
+        parent::__construct($name, [], $nodeId);
 
         $this->_tokenName = $tokenName;
         $this->_unification = $unification;

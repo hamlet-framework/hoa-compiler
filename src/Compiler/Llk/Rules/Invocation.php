@@ -12,10 +12,11 @@ abstract class Invocation
     /**
      * Data.
      */
-    protected mixed $_data = null;
+    protected string|int $_data;
 
     /**
      * Piece of todo sequence.
+     * @var ?array<Invocation>
      */
     protected ?array $_todo = null;
 
@@ -29,7 +30,13 @@ abstract class Invocation
      */
     protected bool $_transitional = false;
 
-    public function __construct(string|int $rule, mixed $data, array $todo = null, int $depth = -1)
+    /**
+     * @param string|int $rule
+     * @param int|string $data
+     * @param ?array<Invocation> $todo
+     * @param int $depth
+     */
+    public function __construct(string|int $rule, int|string $data, array $todo = null, int $depth = -1)
     {
         $this->_rule = $rule;
         $this->_data = $data;
@@ -49,13 +56,14 @@ abstract class Invocation
     /**
      * Get data.
      */
-    public function getData(): mixed
+    public function getData(): string|int
     {
         return $this->_data;
     }
 
     /**
      * Get todo sequence.
+     * @return ?array<Invocation>
      */
     public function getTodo(): ?array
     {

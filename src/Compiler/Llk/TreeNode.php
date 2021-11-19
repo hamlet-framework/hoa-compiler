@@ -17,7 +17,7 @@ class TreeNode implements Element
 
     /**
      * Value of the node (non-null for token nodes).
-     * @var ?array<string>
+     * @var ?array<string,?string>
      */
     protected ?array $_value = null;
 
@@ -39,7 +39,7 @@ class TreeNode implements Element
 
     /**
      * @param string $id
-     * @param ?array<string> $value
+     * @param ?array<string,?string> $value
      * @param array<TreeNode> $children
      * @param ?TreeNode $parent
      */
@@ -68,8 +68,8 @@ class TreeNode implements Element
     }
 
     /**
-     * @param array<string> $value
-     * @return ?array<string>
+     * @param array<string,?string> $value
+     * @return ?array<string,?string>
      */
     public function setValue(array $value): ?array
     {
@@ -78,6 +78,9 @@ class TreeNode implements Element
         return $old;
     }
 
+    /**
+     * @return ?array<string,?string>
+     */
     public function getValue(): ?array
     {
         return $this->_value;
@@ -129,6 +132,9 @@ class TreeNode implements Element
         return $this->childExists($i) ? $this->_children[$i] : null;
     }
 
+    /**
+     * @return array<TreeNode>
+     */
     public function getChildren(): array
     {
         return $this->_children;

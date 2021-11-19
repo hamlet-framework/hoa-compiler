@@ -34,7 +34,7 @@ class Lexer
     /**
      * PCRE options.
      */
-    protected ?string $_pcreOptions = null;
+    protected string $_pcreOptions = '';
 
     /**
      * @param array $pragmas Pragmas.
@@ -53,6 +53,7 @@ class Lexer
      * @param array<string,array> $tokens Tokens to be returned.
      * @return Generator
      * @throws UnrecognizedTokenException
+     * @psalm-suppress MixedAssignment
      */
     public function lexMe(string $text, array $tokens): Generator
     {
@@ -68,6 +69,8 @@ class Lexer
             $_tokens = [];
 
             foreach ($tokens as $fullLexeme => $regex) {
+                assert(is_string($fullLexeme));
+
                 if (!str_contains($fullLexeme, ':')) {
                     $_tokens[$fullLexeme] = [$regex, null];
 
@@ -112,7 +115,7 @@ class Lexer
                 yield $nextToken;
             }
 
-            $offset += strlen($nextToken['value']);
+            $offset += strlen((string) $nextToken['value']);
         }
 
         yield [
@@ -129,6 +132,7 @@ class Lexer
      * Compute the next token recognized at the beginning of the string.
      * @param int $offset Offset.
      * @throws Compiler\Exceptions\LexerException
+     * @psalm-suppress MixedAssignment
      */
     protected function nextToken(int $offset): array|null
     {
@@ -136,11 +140,18 @@ class Lexer
         $tokenArray = &$this->_tokens[$this->_lexerState];
 
         foreach ($tokenArray as $lexeme => $bucket) {
+            /**
+             * @psalm-suppress MixedArrayAccess
+             */
             list($regex, $nextState) = $bucket;
 
             if (null === $nextState) {
                 $nextState = $this->_lexerState;
             }
+
+            assert(is_string($nextState));
+            assert(is_string($lexeme));
+            assert(is_string($regex));
 
             $out = $this->matchLexeme($lexeme, $regex, $offset);
 
@@ -171,14 +182,12 @@ class Lexer
                         $shift = true;
                     }
 
-                    /**
-                     * @psalm-suppress MixedArrayOffset
-                     */
+                    assert(is_string($nextState));
                     if (!isset($this->_tokens[$nextState])) {
                         $message = sprintf(
                             'Namespace %s does not exist, called by token %s ' .
                             'in namespace %s.',
-                            $nextState ?? 'unknown',
+                            $nextState,
                             $lexeme,
                             $this->_lexerState
                         );

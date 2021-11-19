@@ -19,7 +19,6 @@ final class Lookahead implements Iterator
 
     /**
      * Current value.
-     *
      * @var T|null
      */
     private mixed $current = null;

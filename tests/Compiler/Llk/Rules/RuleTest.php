@@ -48,7 +48,7 @@ class RuleTest extends TestCase
         $children = ['bar'];
         $rule = new class($name, $children) extends Rule
         {
-            public function setChildren(mixed $children): mixed
+            public function setChildren(array|string|int $children): array|string|int
             {
                 return parent::setChildren($children);
             }

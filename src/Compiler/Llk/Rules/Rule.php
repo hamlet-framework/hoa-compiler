@@ -11,8 +11,9 @@ abstract class Rule
 
     /**
      * RuleException's children. Can be an array of names or a single name.
+     * @var array<Rule|Invocation|string|int>|string|int|null
      */
-    protected mixed $_children = null;
+    protected array|string|int|null $_children;
 
     /**
      * Node ID.
@@ -31,6 +32,7 @@ abstract class Rule
 
     /**
      * Default options.
+     * @var array<string>
      */
     protected array $_defaultOptions = [];
 
@@ -44,7 +46,12 @@ abstract class Rule
      */
     protected bool $_transitional = true;
 
-    public function __construct(string|int $name, mixed $children, string|null $nodeId = null)
+    /**
+     * @param string|int $name
+     * @param array<Rule|Invocation|string|int>|string|int|null $children
+     * @param string|null $nodeId
+     */
+    public function __construct(string|int $name, array|string|int|null $children, string|null $nodeId = null)
     {
         $this->_name = $name;
         $this->_children = $children;
@@ -63,14 +70,22 @@ abstract class Rule
         return $this->_name;
     }
 
-    protected function setChildren(mixed $children): mixed
+    /**
+     * @param array<Rule|Invocation|string|int>|string|int|null $children
+     * @return array<Rule|Invocation|string|int>|string|int|null
+     * @psalm-suppress MismatchingDocblockParamType
+     */
+    protected function setChildren(array|string|int $children): array|string|int|null
     {
         $old = $this->_children;
         $this->_children = $children;
         return $old;
     }
 
-    public function getChildren(): mixed
+    /**
+     * @return array<Rule|Invocation|string|int>|string|int|null
+     */
+    public function getChildren(): array|string|int|null
     {
         return $this->_children;
     }
@@ -120,6 +135,9 @@ abstract class Rule
         return $this->_defaultId;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getDefaultOptions(): array
     {
         return $this->_defaultOptions;
