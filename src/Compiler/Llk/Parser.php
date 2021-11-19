@@ -142,6 +142,9 @@ class Parser
             if (false === $this->backtrack()) {
                 $token = $this->_errorToken;
 
+                /**
+                 * @psalm-suppress RedundantCondition
+                 */
                 if (null === $this->_errorToken) {
                     $token = $this->_tokenSequence->current();
                 }
@@ -220,7 +223,6 @@ class Parser
             } else {
                 $ruleName = $rule->getRule();
                 $next = $rule->getData();
-                assert($ruleName !== null);
                 $zeRule = $this->_rules[$ruleName];
                 $out = $this->_parse($zeRule, $next);
 
@@ -297,8 +299,6 @@ class Parser
                 $zzeRule->setRepresentation($this->_tokens[$namespace][$name]);
             } else {
                 foreach ($this->_tokens[$namespace] as $_name => $regex) {
-                    assert(is_string($_name));
-
                     if (false === $pos = strpos($_name, ':')) {
                         continue;
                     }
@@ -458,7 +458,6 @@ class Parser
         $next = ((int) $last->getData()) + 1;
         $this->_depth = $last->getDepth();
         $this->_todo = $last->getTodo();
-        assert($rule !== null);
         $this->_todo[] = new Entry($rule, $next);
 
         return true;
@@ -486,7 +485,6 @@ class Parser
 
             if ($trace instanceof Entry) {
                 $ruleName = $trace->getRule();
-                assert($ruleName !== null);
                 $rule = $this->_rules[$ruleName];
                 $isRule = false === $trace->isTransitional();
                 $nextTrace = $this->trace[$i + 1];

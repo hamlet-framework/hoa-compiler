@@ -372,11 +372,9 @@ final class Analyzer
 
             foreach ($this->tokens as $tokens) {
                 foreach ($tokens as $token => $_) {
-                    assert(is_string($token));
                     if ($token === $tokenName ||
                         str_contains($token, ':') && substr($token, 0, strpos($token, ':')) === $tokenName) {
                         $exists = true;
-
                         break 2;
                     }
                 }
@@ -408,7 +406,6 @@ final class Analyzer
 
             foreach ($this->tokens as $tokens) {
                 foreach ($tokens as $token => $_) {
-                    assert(is_string($token));
                     if ($token === $tokenName ||
                         str_contains($token, ':') && substr($token, 0, strpos($token, ':')) === $tokenName) {
                         $exists = true;

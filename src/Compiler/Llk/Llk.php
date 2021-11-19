@@ -34,9 +34,6 @@ abstract class Llk
          * @psalm-suppress InvalidArgument
          */
         $rules = $ruleAnalyzer->analyzeRules($rawRules);
-
-        assert($rules !== null);
-
         return new Parser($tokens, $rules, $pragmas);
     }
 

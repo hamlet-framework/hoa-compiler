@@ -68,11 +68,8 @@ class Lexer
             $_tokens = [];
 
             foreach ($tokens as $fullLexeme => $regex) {
-                assert(is_string($fullLexeme));
-
                 if (!str_contains($fullLexeme, ':')) {
                     $_tokens[$fullLexeme] = [$regex, null];
-
                     continue;
                 }
 
