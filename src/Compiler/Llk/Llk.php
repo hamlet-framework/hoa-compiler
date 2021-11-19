@@ -220,7 +220,7 @@ abstract class Llk
                 continue;
             }
 
-            if ('%' == $line[0]) {
+            if (str_starts_with($line, '%')) {
                 if (0 !== preg_match('#^%pragma\h+([^\h]+)\h+(.*)$#u', $line, $matches)) {
                     switch ($matches[2]) {
                         case 'true':
@@ -292,8 +292,8 @@ abstract class Llk
             $rule = '';
             ++$i;
             while ($i < $m
-                && isset($lines[$i][0])
-                && (' ' === $lines[$i][0] || "\t" === $lines[$i][0] || str_starts_with($lines[$i], '//'))) {
+                && strlen($lines[$i]) > 0
+                && (str_starts_with($lines[$i], ' ') || str_starts_with($lines[$i], "\t") || str_starts_with($lines[$i], '//'))) {
                 if (str_starts_with($lines[$i], '//')) {
                     ++$i;
                     continue;
