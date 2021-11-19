@@ -60,7 +60,7 @@ final class Analyzer
     protected int $_transitionalRuleCounter = 0;
 
     /**
-     * @param array<string,array<string>> $tokens Tokens representing rules.
+     * @param array<string,array<string,string>> $tokens Tokens representing rules.
      */
     public function __construct(private array $tokens)
     {

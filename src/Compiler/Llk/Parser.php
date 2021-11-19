@@ -34,7 +34,7 @@ class Parser
 
     /**
      * Associative array (token name => token regex), to be defined in precedence order.
-     * @var array<string,array<string>>
+     * @var array<string,array<string,string>>
      */
     protected array $_tokens;
 
@@ -58,7 +58,7 @@ class Parser
      * Trace of activated rules.
      * @var array<Invocation|Rule>
      */
-    protected array $_trace = [];
+    protected array $trace = [];
 
     /**
      * Stack of todo list.
@@ -79,7 +79,7 @@ class Parser
     /**
      * Construct the parser.
      *
-     * @param array<string,array<string>> $tokens Tokens.
+     * @param array<string,array<string,string>> $tokens Tokens.
      * @param array<Rule> $rules Rules.
      * @param array<string,string|int|bool> $pragmas Pragmas.
      */
@@ -120,7 +120,7 @@ class Parser
         $this->_tokenSequence->rewind();
 
         $this->_errorToken = null;
-        $this->_trace = [];
+        $this->trace = [];
         $this->_todo = [];
 
         if ($rule === null || false === array_key_exists($rule, $this->_rules)) {
@@ -212,7 +212,7 @@ class Parser
 
             if ($rule instanceof Ekzit) {
                 $rule->setDepth($this->_depth);
-                $this->_trace[] = $rule;
+                $this->trace[] = $rule;
 
                 if (false === $rule->isTransitional()) {
                     --$this->_depth;
@@ -235,28 +235,28 @@ class Parser
 
     /**
      * Parse current rule.
-     * @param Rule $zeRule Current rule.
-     * @param string|int $next Next rule index.
+     * @param Rule $currentRule Current rule.
+     * @param string|int $nextRuleIndex Next rule index.
      * @return bool
      * @psalm-suppress MixedArrayAccess
      * @psalm-suppress MixedAssignment
      */
-    protected function _parse(Rule $zeRule, string|int $next): bool
+    protected function _parse(Rule $currentRule, string|int $nextRuleIndex): bool
     {
         assert($this->_tokenSequence !== null);
 
-        if ($zeRule instanceof Token) {
+        if ($currentRule instanceof Token) {
             $name = $this->_tokenSequence->current()['token'];
 
-            if ($zeRule->getTokenName() !== $name) {
+            if ($currentRule->getTokenName() !== $name) {
                 return false;
             }
 
             $value = $this->_tokenSequence->current()['value'];
 
-            if (0 <= $unification = $zeRule->getUnificationIndex()) {
-                for ($skip = 0, $i = count($this->_trace) - 1; $i >= 0; --$i) {
-                    $trace = $this->_trace[$i];
+            if (0 <= $unification = $currentRule->getUnificationIndex()) {
+                for ($skip = 0, $i = count($this->trace) - 1; $i >= 0; --$i) {
+                    $trace = $this->trace[$i];
 
                     if ($trace instanceof Entry) {
                         if (false === $trace->isTransitional()) {
@@ -284,7 +284,7 @@ class Parser
             }
 
             $namespace = $this->_tokenSequence->current()['namespace'];
-            $zzeRule = clone $zeRule;
+            $zzeRule = clone $currentRule;
             assert(is_string($value));
             $zzeRule->setValue($value);
             assert(is_string($namespace));
@@ -316,23 +316,23 @@ class Parser
             assert($this->_todo !== null);
 
             array_pop($this->_todo);
-            $this->_trace[] = $zzeRule;
+            $this->trace[] = $zzeRule;
             $this->_tokenSequence->next();
             $this->_errorToken = $this->_tokenSequence->current();
 
             return true;
-        } elseif ($zeRule instanceof Concatenation) {
-            if (false === $zeRule->isTransitional()) {
+        } elseif ($currentRule instanceof Concatenation) {
+            if (false === $currentRule->isTransitional()) {
                 ++$this->_depth;
             }
 
-            $this->_trace[] = new Entry(
-                $zeRule->getName(),
+            $this->trace[] = new Entry(
+                $currentRule->getName(),
                 0,
                 null,
                 $this->_depth
             );
-            $children = $zeRule->getChildren();
+            $children = $currentRule->getChildren();
 
             assert(is_array($children));
             for ($i = count($children) - 1; $i >= 0; --$i) {
@@ -343,41 +343,41 @@ class Parser
             }
 
             return true;
-        } elseif ($zeRule instanceof Choice) {
-            $children = $zeRule->getChildren();
+        } elseif ($currentRule instanceof Choice) {
+            $children = $currentRule->getChildren();
             assert(is_array($children));
-            if ($next >= count($children)) {
+            if ($nextRuleIndex >= count($children)) {
                 return false;
             }
 
-            if (false === $zeRule->isTransitional()) {
+            if (false === $currentRule->isTransitional()) {
                 ++$this->_depth;
             }
 
-            $this->_trace[] = new Entry(
-                $zeRule->getName(),
-                $next,
+            $this->trace[] = new Entry(
+                $currentRule->getName(),
+                $nextRuleIndex,
                 $this->_todo,
                 $this->_depth
             );
-            $nextRule = $children[$next];
+            $nextRule = $children[$nextRuleIndex];
             assert(is_scalar($nextRule));
             $this->_todo[] = new Ekzit($nextRule, 0);
             $this->_todo[] = new Entry($nextRule, 0);
 
             return true;
-        } elseif ($zeRule instanceof Repetition) {
-            $nextRule = $zeRule->getChildren();
+        } elseif ($currentRule instanceof Repetition) {
+            $nextRule = $currentRule->getChildren();
 
-            if (0 === $next) {
-                $name = $zeRule->getName();
-                $min = $zeRule->getMin();
+            if (0 === $nextRuleIndex) {
+                $name = $currentRule->getName();
+                $min = $currentRule->getMin();
 
-                if (false === $zeRule->isTransitional()) {
+                if (false === $currentRule->isTransitional()) {
                     ++$this->_depth;
                 }
 
-                $this->_trace[] = new Entry(
+                $this->trace[] = new Entry(
                     $name,
                     $min,
                     null,
@@ -399,15 +399,15 @@ class Parser
 
                 return true;
             } else {
-                $max = $zeRule->getMax();
+                $max = $currentRule->getMax();
 
-                if (-1 != $max && $next > $max) {
+                if (-1 != $max && $nextRuleIndex > $max) {
                     return false;
                 }
 
                 $this->_todo[] = new Ekzit(
-                    $zeRule->getName(),
-                    $next,
+                    $currentRule->getName(),
+                    $nextRuleIndex,
                     $this->_todo
                 );
                 assert(is_scalar($nextRule));
@@ -429,8 +429,7 @@ class Parser
         $found = false;
 
         do {
-            $last = array_pop($this->_trace);
-
+            $last = array_pop($this->trace);
             if ($last instanceof Entry) {
                 $zeRule = $this->_rules[$last->getRule()];
                 $found = $zeRule instanceof Choice;
@@ -448,7 +447,7 @@ class Parser
                     return false;
                 }
             }
-        } while (0 < count($this->_trace) && false === $found);
+        } while (0 < count($this->trace) && false === $found);
 
         if (false === $found) {
             return false;
@@ -479,18 +478,18 @@ class Parser
      */
     protected function _buildTree(int $i = 0, array &$children = []): TreeNode|int
     {
-        $max = count($this->_trace);
+        $max = count($this->trace);
 
         while ($i < $max) {
             assert(is_int($i));
-            $trace = $this->_trace[$i];
+            $trace = $this->trace[$i];
 
             if ($trace instanceof Entry) {
                 $ruleName = $trace->getRule();
                 assert($ruleName !== null);
                 $rule = $this->_rules[$ruleName];
                 $isRule = false === $trace->isTransitional();
-                $nextTrace = $this->_trace[$i + 1];
+                $nextTrace = $this->trace[$i + 1];
                 $id = $rule->getNodeId();
 
                 // Optimization: Skip empty trace sequence.
@@ -678,7 +677,7 @@ class Parser
      */
     public function getTrace(): array
     {
-        return $this->_trace;
+        return $this->trace;
     }
 
     /**

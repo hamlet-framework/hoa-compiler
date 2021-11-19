@@ -4,7 +4,6 @@ namespace Hoa\Compiler\Llk;
 
 use Hoa\Compiler;
 use Hoa\Compiler\Exceptions\Exception;
-use Hoa\Compiler\Llk\Rules\Rule;
 
 abstract class Llk
 {
@@ -45,7 +44,7 @@ abstract class Llk
      * Save in-memory parser to PHP code.
      * The generated PHP code will load the same in-memory parser. The state
      * will be reset. The parser will be saved as a class, named after
-     * `$className`. To retrieve the parser, one must instanciate this class.
+     * `$className`. To retrieve the parser, one must instantiate this class.
      *
      * @param Parser $parser Parser to save.
      * @param string $className Parser classname.
@@ -206,7 +205,7 @@ abstract class Llk
      * Parse the grammar description language.
      *
      * @param string $pp Grammar description.
-     * @param array<string,array<string>> $tokens Extracted tokens.
+     * @param array<string,array<string,string>> $tokens Extracted tokens.
      * @param array<string,?string> $rules Extracted raw rules.
      * @param array<string,string|int|bool> $pragmas Extracted raw pragmas.
      * @param string $streamName The name of the stream containing the grammar.

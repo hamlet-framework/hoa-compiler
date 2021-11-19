@@ -10,7 +10,6 @@ use Hoa\Compiler\Visitor\Visit;
  */
 final class TreeNode implements Element
 {
-
     /**
      * Value of the node (non-null for token nodes).
      * @var ?array<string,?string>

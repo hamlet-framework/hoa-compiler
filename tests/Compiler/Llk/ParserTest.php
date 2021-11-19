@@ -48,4 +48,41 @@ DUMP;
 DUMP;
         $this->assertEquals($dump, (new Dump)->visit($ast));
     }
+
+    public function test_psalm_1(): void
+    {
+        $path = __DIR__ . '/../../Grammars/Psalm.pp';
+        $compiler = Llk::load($path);
+        $ast = $compiler->parse('callable(\\Iterator<I>):(array{float,int}|false)');
+
+        $dump = <<<'DUMP'
+>  #basic_type
+>  >  #callable
+>  >  >  token(callable, callable)
+>  >  >  #basic_type
+>  >  >  >  #generic
+>  >  >  >  >  #class_name
+>  >  >  >  >  >  #backslash
+>  >  >  >  >  >  token(id, Iterator)
+>  >  >  >  >  #basic_type
+>  >  >  >  >  >  #class_name
+>  >  >  >  >  >  >  token(id, I)
+>  >  >  #basic_type
+>  >  >  >  #union
+>  >  >  >  >  #basic_type
+>  >  >  >  >  >  #object_like_array
+>  >  >  >  >  >  >  token(array, array)
+>  >  >  >  >  >  >  #property
+>  >  >  >  >  >  >  >  #basic_type
+>  >  >  >  >  >  >  >  >  token(built_in, float)
+>  >  >  >  >  >  >  #property
+>  >  >  >  >  >  >  >  #basic_type
+>  >  >  >  >  >  >  >  >  token(built_in, int)
+>  >  >  >  >  #basic_type
+>  >  >  >  >  >  #literal
+>  >  >  >  >  >  >  token(false, false)
+
+DUMP;
+        $this->assertEquals($dump, (new Dump)->visit($ast));
+    }
 }

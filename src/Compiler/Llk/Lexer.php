@@ -50,10 +50,9 @@ class Lexer
      * Text tokenizer: splits the text in parameter in an ordered array of tokens.
      *
      * @param string $text Text to tokenize.
-     * @param array<string,array> $tokens Tokens to be returned.
+     * @param array<string,array<string,string>> $tokens Tokens to be returned.
      * @return Generator
      * @throws UnrecognizedTokenException
-     * @psalm-suppress MixedAssignment
      */
     public function lexMe(string $text, array $tokens): Generator
     {
