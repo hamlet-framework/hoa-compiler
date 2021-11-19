@@ -25,29 +25,24 @@ class Parser
      * List of pragmas.
      * @var array<string,string|int|bool>
      */
-    protected array $_pragmas;
-
-    /**
-     * List of skipped tokens.
-     */
-    protected ?array $_skip = null;
+    protected array $pragmas;
 
     /**
      * Associative array (token name => token regex), to be defined in precedence order.
      * @var array<string,array<string,string>>
      */
-    protected array $_tokens;
+    protected array $tokens;
 
     /**
-     * Rules, to be defined as associative array, name => Rule object.
+     * Rules, to be defined as associative array, name(which can be numerical) => Rule object.
      * @var array<Rule>
      */
-    protected array $_rules;
+    protected array $rules;
 
     /**
      * Lexer iterator.
      */
-    protected Buffer|Lookahead|null $_tokenSequence = null;
+    protected Buffer|Lookahead|null $tokenSequence = null;
 
     /**
      * Possible token causing an error.
@@ -64,7 +59,7 @@ class Parser
      * Stack of todo list.
      * @var ?array<Invocation>
      */
-    protected ?array $_todo = null;
+    protected ?array $todo = null;
 
     /**
      * AST.
@@ -74,7 +69,7 @@ class Parser
     /**
      * Current depth while building the trace.
      */
-    protected int $_depth = -1;
+    protected int $depth = -1;
 
     /**
      * Construct the parser.
@@ -88,9 +83,9 @@ class Parser
         array $rules = [],
         array $pragmas = []
     ) {
-        $this->_tokens = $tokens;
-        $this->_rules = $rules;
-        $this->_pragmas = $pragmas;
+        $this->tokens = $tokens;
+        $this->rules = $rules;
+        $this->pragmas = $pragmas;
     }
 
     /**
@@ -101,41 +96,39 @@ class Parser
      * @param bool $tree Whether build tree or not.
      * @return TreeNode
      * @throws UnexpectedTokenException
-     * @psalm-suppress MixedArrayAccess
-     * @psalm-suppress MixedAssignment
      */
     public function parse(string $text, string $rule = null, bool $tree = true): TreeNode
     {
         $k = 1024;
 
-        if (isset($this->_pragmas['parser.lookahead'])) {
-            $k = max(0, intval($this->_pragmas['parser.lookahead']));
+        if (isset($this->pragmas['parser.lookahead'])) {
+            $k = max(0, intval($this->pragmas['parser.lookahead']));
         }
 
-        $lexer = new Lexer($this->_pragmas);
-        $this->_tokenSequence = new Buffer(
-            $lexer->lexMe($text, $this->_tokens),
+        $lexer = new Lexer($this->pragmas);
+        $this->tokenSequence = new Buffer(
+            $lexer->lexMe($text, $this->tokens),
             $k
         );
-        $this->_tokenSequence->rewind();
+        $this->tokenSequence->rewind();
 
         $this->_errorToken = null;
         $this->trace = [];
-        $this->_todo = [];
+        $this->todo = [];
 
-        if ($rule === null || false === array_key_exists($rule, $this->_rules)) {
+        if ($rule === null || false === array_key_exists($rule, $this->rules)) {
             $rule = $this->getRootRule();
         }
 
         $closeRule = new Ekzit($rule, 0);
         $openRule = new Entry($rule, 0, [$closeRule]);
-        $this->_todo = [$closeRule, $openRule];
+        $this->todo = [$closeRule, $openRule];
 
         do {
             $out = $this->unfold();
 
             if (null !== $out &&
-                'EOF' === $this->_tokenSequence->current()['token']) {
+                'EOF' === $this->tokenSequence->current()['token']) {
                 break;
             }
 
@@ -146,14 +139,12 @@ class Parser
                  * @psalm-suppress RedundantCondition
                  */
                 if (null === $this->_errorToken) {
-                    $token = $this->_tokenSequence->current();
+                    $token = $this->tokenSequence->current();
                 }
 
                 assert($token !== null);
 
                 $offset = $token['offset'];
-
-                assert(is_int($offset));
 
                 $line = 1;
                 $column = 1;
@@ -178,8 +169,8 @@ class Parser
                 $message = sprintf(
                     'Unexpected token "%s" (%s) at line %d and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
-                    $token ? (string) $token['value'] : '',
-                    $token ? (string) $token['token'] : '',
+                    $token['value'],
+                    $token['token'],
                     $line,
                     $column,
                     $text
@@ -206,32 +197,29 @@ class Parser
 
     /**
      * Unfold trace.
-     * @psalm-suppress PossiblyNullArgument
      */
     protected function unfold(): ?bool
     {
-        while (0 < count($this->_todo)) {
-            $rule = array_pop($this->_todo);
-
-            if ($rule instanceof Ekzit) {
-                $rule->setDepth($this->_depth);
-                $this->trace[] = $rule;
-
-                if (false === $rule->isTransitional()) {
-                    --$this->_depth;
-                }
-            } else {
-                $ruleName = $rule->getRule();
-                $next = $rule->getData();
-                $zeRule = $this->_rules[$ruleName];
-                $out = $this->_parse($zeRule, $next);
-
-                if (false === $out && false === $this->backtrack()) {
-                    return null;
+        if ($this->todo) {
+            while (0 < count($this->todo)) {
+                $rule = array_pop($this->todo);
+                if ($rule instanceof Ekzit) {
+                    $rule->setDepth($this->depth);
+                    $this->trace[] = $rule;
+                    if (false === $rule->isTransitional()) {
+                        $this->depth--;
+                    }
+                } else {
+                    $ruleName = $rule->getRule();
+                    $next = $rule->getData();
+                    $zeRule = $this->rules[$ruleName];
+                    $out = $this->_parse($zeRule, $next);
+                    if ($out === false && $this->backtrack() === false) {
+                        return null;
+                    }
                 }
             }
         }
-
         return true;
     }
 
@@ -245,16 +233,16 @@ class Parser
      */
     protected function _parse(Rule $currentRule, string|int $nextRuleIndex): bool
     {
-        assert($this->_tokenSequence !== null);
+        assert($this->tokenSequence !== null);
 
         if ($currentRule instanceof Token) {
-            $name = $this->_tokenSequence->current()['token'];
+            $name = $this->tokenSequence->current()['token'];
 
             if ($currentRule->getTokenName() !== $name) {
                 return false;
             }
 
-            $value = $this->_tokenSequence->current()['value'];
+            $value = $this->tokenSequence->current()['value'];
 
             if (0 <= $unification = $currentRule->getUnificationIndex()) {
                 for ($skip = 0, $i = count($this->trace) - 1; $i >= 0; --$i) {
@@ -262,7 +250,7 @@ class Parser
 
                     if ($trace instanceof Entry) {
                         if (false === $trace->isTransitional()) {
-                            if ($trace->getDepth() <= $this->_depth) {
+                            if ($trace->getDepth() <= $this->depth) {
                                 break;
                             }
 
@@ -270,7 +258,7 @@ class Parser
                         }
                     } elseif ($trace instanceof Ekzit &&
                         false === $trace->isTransitional()) {
-                        $skip += (int)($trace->getDepth() > $this->_depth);
+                        $skip += (int)($trace->getDepth() > $this->depth);
                     }
 
                     if (0 < $skip) {
@@ -285,7 +273,7 @@ class Parser
                 }
             }
 
-            $namespace = $this->_tokenSequence->current()['namespace'];
+            $namespace = $this->tokenSequence->current()['namespace'];
             $zzeRule = clone $currentRule;
             assert(is_string($value));
             $zzeRule->setValue($value);
@@ -295,10 +283,10 @@ class Parser
             /**
              * @psalm-suppress MixedArrayOffset
              */
-            if (isset($this->_tokens[$namespace][$name])) {
-                $zzeRule->setRepresentation($this->_tokens[$namespace][$name]);
+            if (isset($this->tokens[$namespace][$name])) {
+                $zzeRule->setRepresentation($this->tokens[$namespace][$name]);
             } else {
-                foreach ($this->_tokens[$namespace] as $_name => $regex) {
+                foreach ($this->tokens[$namespace] as $_name => $regex) {
                     if (false === $pos = strpos($_name, ':')) {
                         continue;
                     }
@@ -313,24 +301,24 @@ class Parser
                 $zzeRule->setRepresentation($regex);
             }
 
-            assert($this->_todo !== null);
+            assert($this->todo !== null);
 
-            array_pop($this->_todo);
+            array_pop($this->todo);
             $this->trace[] = $zzeRule;
-            $this->_tokenSequence->next();
-            $this->_errorToken = $this->_tokenSequence->current();
+            $this->tokenSequence->next();
+            $this->_errorToken = $this->tokenSequence->current();
 
             return true;
         } elseif ($currentRule instanceof Concatenation) {
             if (false === $currentRule->isTransitional()) {
-                ++$this->_depth;
+                ++$this->depth;
             }
 
             $this->trace[] = new Entry(
                 $currentRule->getName(),
                 0,
                 null,
-                $this->_depth
+                $this->depth
             );
             $children = $currentRule->getChildren();
 
@@ -338,8 +326,8 @@ class Parser
             for ($i = count($children) - 1; $i >= 0; --$i) {
                 $nextRule = $children[$i];
                 assert(is_scalar($nextRule));
-                $this->_todo[] = new Ekzit($nextRule, 0);
-                $this->_todo[] = new Entry($nextRule, 0);
+                $this->todo[] = new Ekzit($nextRule, 0);
+                $this->todo[] = new Entry($nextRule, 0);
             }
 
             return true;
@@ -351,19 +339,19 @@ class Parser
             }
 
             if (false === $currentRule->isTransitional()) {
-                ++$this->_depth;
+                ++$this->depth;
             }
 
             $this->trace[] = new Entry(
                 $currentRule->getName(),
                 $nextRuleIndex,
-                $this->_todo,
-                $this->_depth
+                $this->todo,
+                $this->depth
             );
             $nextRule = $children[$nextRuleIndex];
             assert(is_scalar($nextRule));
-            $this->_todo[] = new Ekzit($nextRule, 0);
-            $this->_todo[] = new Entry($nextRule, 0);
+            $this->todo[] = new Ekzit($nextRule, 0);
+            $this->todo[] = new Entry($nextRule, 0);
 
             return true;
         } elseif ($currentRule instanceof Repetition) {
@@ -374,27 +362,27 @@ class Parser
                 $min = $currentRule->getMin();
 
                 if (false === $currentRule->isTransitional()) {
-                    ++$this->_depth;
+                    ++$this->depth;
                 }
 
                 $this->trace[] = new Entry(
                     $name,
                     $min,
                     null,
-                    $this->_depth
+                    $this->depth
                 );
-                assert($this->_todo !== null);
-                array_pop($this->_todo);
-                $this->_todo[] = new Ekzit(
+                assert($this->todo !== null);
+                array_pop($this->todo);
+                $this->todo[] = new Ekzit(
                     $name,
                     $min,
-                    $this->_todo
+                    $this->todo
                 );
 
                 for ($i = 0; $i < $min; ++$i) {
                     assert(is_scalar($nextRule));
-                    $this->_todo[] = new Ekzit($nextRule, 0);
-                    $this->_todo[] = new Entry($nextRule, 0);
+                    $this->todo[] = new Ekzit($nextRule, 0);
+                    $this->todo[] = new Entry($nextRule, 0);
                 }
 
                 return true;
@@ -405,14 +393,14 @@ class Parser
                     return false;
                 }
 
-                $this->_todo[] = new Ekzit(
+                $this->todo[] = new Ekzit(
                     $currentRule->getName(),
                     $nextRuleIndex,
-                    $this->_todo
+                    $this->todo
                 );
                 assert(is_scalar($nextRule));
-                $this->_todo[] = new Ekzit($nextRule, 0);
-                $this->_todo[] = new Entry($nextRule, 0);
+                $this->todo[] = new Ekzit($nextRule, 0);
+                $this->todo[] = new Entry($nextRule, 0);
 
                 return true;
             }
@@ -431,19 +419,19 @@ class Parser
         do {
             $last = array_pop($this->trace);
             if ($last instanceof Entry) {
-                $zeRule = $this->_rules[$last->getRule()];
+                $zeRule = $this->rules[$last->getRule()];
                 $found = $zeRule instanceof Choice;
             } elseif ($last instanceof Ekzit) {
-                $zeRule = $this->_rules[$last->getRule()];
+                $zeRule = $this->rules[$last->getRule()];
                 $found = $zeRule instanceof Repetition;
             } elseif ($last instanceof Token) {
                 /**
                  * @psalm-suppress PossiblyUndefinedMethod
                  * @psalm-suppress PossiblyNullReference
                  */
-                $this->_tokenSequence->previous();
+                $this->tokenSequence->previous();
 
-                if (false === $this->_tokenSequence?->valid()) {
+                if (false === $this->tokenSequence?->valid()) {
                     return false;
                 }
             }
@@ -456,9 +444,9 @@ class Parser
         assert($last instanceof Invocation);
         $rule = $last->getRule();
         $next = ((int) $last->getData()) + 1;
-        $this->_depth = $last->getDepth();
-        $this->_todo = $last->getTodo();
-        $this->_todo[] = new Entry($rule, $next);
+        $this->depth = $last->getDepth();
+        $this->todo = $last->getTodo();
+        $this->todo[] = new Entry($rule, $next);
 
         return true;
     }
@@ -485,7 +473,7 @@ class Parser
 
             if ($trace instanceof Entry) {
                 $ruleName = $trace->getRule();
-                $rule = $this->_rules[$ruleName];
+                $rule = $this->rules[$ruleName];
                 $isRule = false === $trace->isTransitional();
                 $nextTrace = $this->trace[$i + 1];
                 $id = $rule->getNodeId();
@@ -594,36 +582,29 @@ class Parser
      * @param array<TreeNode> &$children Current children being gathering.
      * @param array<TreeNode> &$handle Children of the new node.
      * @param string $cId Node ID.
-     * @param bool $recursive Whether we should merge recursively or
-     *                                not.
-     * @return  bool
+     * @param bool $recursive Whether we should merge recursively or not.
+     * @return bool
      */
     protected function mergeTree(array &$children, array &$handle, string $cId, bool $recursive): bool
     {
         end($children);
         $last = current($children);
-
         if (!is_object($last)) {
             return false;
         }
-
         if ($cId !== $last->getId()) {
             return false;
         }
-
-        if (true === $recursive) {
+        if ($recursive) {
             foreach ($handle as $child) {
                 $this->mergeTreeRecursive($last, $child);
             }
-
             return true;
         }
-
         foreach ($handle as $child) {
             $last->appendChild($child);
             $child->setParent($last);
         }
-
         return true;
     }
 
@@ -633,9 +614,9 @@ class Parser
      *
      * @param TreeNode $node Node that receives.
      * @param TreeNode $newNode Node to merge.
-     * @return  void
+     * @return void
      */
-    protected function mergeTreeRecursive(TreeNode $node, TreeNode $newNode)
+    protected function mergeTreeRecursive(TreeNode $node, TreeNode $newNode): void
     {
         $nNId = $newNode->getId();
 
@@ -684,7 +665,7 @@ class Parser
      */
     public function getPragmas(): array
     {
-        return $this->_pragmas;
+        return $this->pragmas;
     }
 
     /**
@@ -693,7 +674,7 @@ class Parser
      */
     public function getTokens(): array
     {
-        return $this->_tokens;
+        return $this->tokens;
     }
 
     /**
@@ -701,7 +682,7 @@ class Parser
      */
     public function getTokenSequence(): Lookahead|Buffer|null
     {
-        return $this->_tokenSequence;
+        return $this->tokenSequence;
     }
 
     /**
@@ -709,10 +690,10 @@ class Parser
      */
     public function getRule(string|int $name): ?Rule
     {
-        if (!isset($this->_rules[$name])) {
+        if (!isset($this->rules[$name])) {
             return null;
         }
-        return $this->_rules[$name];
+        return $this->rules[$name];
     }
 
     /**
@@ -721,7 +702,7 @@ class Parser
      */
     public function getRules(): array
     {
-        return $this->_rules;
+        return $this->rules;
     }
 
     /**
@@ -729,7 +710,7 @@ class Parser
      */
     public function getRootRule(): int|string
     {
-        foreach ($this->_rules as $rule => $_) {
+        foreach ($this->rules as $rule => $_) {
             if (!is_int($rule)) {
                 return $rule;
             }

@@ -30,9 +30,6 @@ abstract class Llk
         static::parsePP($pp, $tokens, $rawRules, $pragmas, $path);
 
         $ruleAnalyzer = new Rules\Analyzer($tokens);
-        /**
-         * @psalm-suppress InvalidArgument
-         */
         $rules = $ruleAnalyzer->analyzeRules($rawRules);
         return new Parser($tokens, $rules, $pragmas);
     }
@@ -203,12 +200,11 @@ abstract class Llk
      *
      * @param string $pp Grammar description.
      * @param array<string,array<string,string>> $tokens Extracted tokens.
-     * @param array<string,?string> $rules Extracted raw rules.
+     * @param array<string,string> $rules Extracted raw rules.
      * @param array<string,string|int|bool> $pragmas Extracted raw pragmas.
      * @param string $streamName The name of the stream containing the grammar.
      * @return void
      * @throws Exception
-     * @psalm-suppress PossiblyNullOperand
      */
     public static function parsePP(string $pp, array &$tokens, array &$rules, array &$pragmas, string $streamName): void
     {
@@ -220,7 +216,7 @@ abstract class Llk
         for ($i = 0, $m = count($lines); $i < $m; ++$i) {
             $line = rtrim($lines[$i]);
 
-            if (0 === strlen($line) || '//' == substr($line, 0, 2)) {
+            if (empty($line) || str_starts_with($line, '//')) {
                 continue;
             }
 
@@ -293,23 +289,17 @@ abstract class Llk
             }
 
             $ruleName = substr($line, 0, -1);
-            $rule = null;
+            $rule = '';
             ++$i;
-
-            while ($i < $m &&
-                isset($lines[$i][0]) &&
-                (' ' === $lines[$i][0] ||
-                    "\t" === $lines[$i][0] ||
-                    '//' === substr($lines[$i], 0, 2))) {
-                if ('//' === substr($lines[$i], 0, 2)) {
+            while ($i < $m
+                && isset($lines[$i][0])
+                && (' ' === $lines[$i][0] || "\t" === $lines[$i][0] || str_starts_with($lines[$i], '//'))) {
+                if (str_starts_with($lines[$i], '//')) {
                     ++$i;
-
                     continue;
                 }
-
                 $rule .= ' ' . trim($lines[$i++]);
             }
-
             if (isset($lines[$i][0])) {
                 --$i;
             }

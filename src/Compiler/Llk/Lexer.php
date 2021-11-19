@@ -11,9 +11,8 @@ class Lexer
 {
     /**
      * Lexer state.
-     * @var array|string
      */
-    protected array|string $_lexerState = 'default';
+    protected string $lexerState = 'default';
 
     /**
      * Text.
@@ -21,9 +20,9 @@ class Lexer
     protected ?string $_text = null;
 
     /**
-     * @var array<string,array>
+     * @var array<string,array<string,string>>
      */
-    protected array $_tokens = [];
+    protected array $tokens = [];
 
     /**
      * Namespace stacks.
@@ -51,20 +50,20 @@ class Lexer
      *
      * @param string $text Text to tokenize.
      * @param array<string,array<string,string>> $tokens Tokens to be returned.
-     * @return Generator
+     * @return Generator<array{token:string,value:string,length:int,namespace:string,keep:bool,offset:int}>
      * @throws UnrecognizedTokenException
      */
     public function lexMe(string $text, array $tokens): Generator
     {
         $this->_text = $text;
-        $this->_tokens = $tokens;
+        $this->tokens = $tokens;
         $this->_nsStack = null;
         $offset = 0;
         $maxOffset = strlen($this->_text);
-        $this->_lexerState = 'default';
+        $this->lexerState = 'default';
         $stack = false;
 
-        foreach ($this->_tokens as &$tokens) {
+        foreach ($this->tokens as &$tokens) {
             $_tokens = [];
 
             foreach ($tokens as $fullLexeme => $regex) {
@@ -111,7 +110,7 @@ class Lexer
                 yield $nextToken;
             }
 
-            $offset += strlen((string) $nextToken['value']);
+            $offset += strlen($nextToken['value']);
         }
 
         yield [
@@ -127,35 +126,30 @@ class Lexer
     /**
      * Compute the next token recognized at the beginning of the string.
      * @param int $offset Offset.
+     * @return ?array{keep:bool,length:int,namespace:string,token:string,value:string}
      * @throws Compiler\Exceptions\LexerException
-     * @psalm-suppress MixedAssignment
      */
-    protected function nextToken(int $offset): array|null
+    protected function nextToken(int $offset): ?array
     {
-        assert(is_string($this->_lexerState));
-        $tokenArray = &$this->_tokens[$this->_lexerState];
+        /**
+         * @var array<string,array{string,?string}> $tokenArray
+         */
+        $tokenArray = &$this->tokens[$this->lexerState];
 
         foreach ($tokenArray as $lexeme => $bucket) {
-            /**
-             * @psalm-suppress MixedArrayAccess
-             */
             list($regex, $nextState) = $bucket;
 
             if (null === $nextState) {
-                $nextState = $this->_lexerState;
+                $nextState = $this->lexerState;
             }
-
-            assert(is_string($nextState));
-            assert(is_string($lexeme));
-            assert(is_string($regex));
 
             $out = $this->matchLexeme($lexeme, $regex, $offset);
 
             if (null !== $out) {
-                $out['namespace'] = $this->_lexerState;
+                $out['namespace'] = $this->lexerState;
                 $out['keep'] = 'skip' !== $lexeme;
 
-                if ($nextState !== $this->_lexerState) {
+                if ($nextState !== $this->lexerState) {
                     $shift = false;
 
                     if (null !== $this->_nsStack &&
@@ -165,7 +159,7 @@ class Lexer
                         if ($i > ($c = count($this->_nsStack))) {
                             $message = sprintf('Cannot shift namespace %d-times, from token ' .
                                 '%s in namespace %s, because the stack ' .
-                                'contains only %d namespaces.', $i, $lexeme, $this->_lexerState, $c);
+                                'contains only %d namespaces.', $i, $lexeme, $this->lexerState, $c);
                             throw new Compiler\Exceptions\LexerException($message, 1);
                         }
 
@@ -179,22 +173,22 @@ class Lexer
                     }
 
                     assert(is_string($nextState));
-                    if (!isset($this->_tokens[$nextState])) {
+                    if (!isset($this->tokens[$nextState])) {
                         $message = sprintf(
                             'Namespace %s does not exist, called by token %s ' .
                             'in namespace %s.',
                             $nextState,
                             $lexeme,
-                            $this->_lexerState
+                            $this->lexerState
                         );
                         throw new Compiler\Exceptions\LexerException($message, 2);
                     }
 
                     if (null !== $this->_nsStack && false === $shift) {
-                        $this->_nsStack->push($this->_lexerState);
+                        $this->_nsStack->push($this->lexerState);
                     }
 
-                    $this->_lexerState = $nextState;
+                    $this->lexerState = $nextState;
                 }
 
                 return $out;
