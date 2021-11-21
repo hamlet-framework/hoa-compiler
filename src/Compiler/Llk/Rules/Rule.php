@@ -2,11 +2,14 @@
 
 namespace Hoa\Compiler\Llk\Rules;
 
+/**
+ * @template C
+ */
 abstract class Rule
 {
     /**
      * RuleException's children. Can be an array of names or a single name.
-     * @var array<Rule|Invocation|string|int>|string|int|null
+     * @var C
      */
     protected array|string|int|null $children;
 
@@ -44,10 +47,10 @@ abstract class Rule
 
     /**
      * @param string|int $name
-     * @param array<Rule|Invocation|string|int>|string|int|null $children
+     * @param C $children
      * @param string|null $nodeId
      */
-    public function __construct(protected string|int $name, array|string|int|null $children, string|null $nodeId = null)
+    public function __construct(protected string|int $name, mixed $children, string|null $nodeId = null)
     {
         $this->children = $children;
         $this->setNodeId($nodeId);
@@ -66,11 +69,10 @@ abstract class Rule
     }
 
     /**
-     * @param array<Rule|Invocation|string|int>|string|int|null $children
-     * @return array<Rule|Invocation|string|int>|string|int|null
-     * @psalm-suppress MismatchingDocblockParamType
+     * @param C $children
+     * @return C
      */
-    protected function setChildren(array|string|int $children): array|string|int|null
+    protected function setChildren(mixed $children): mixed
     {
         $old = $this->children;
         $this->children = $children;
@@ -78,9 +80,9 @@ abstract class Rule
     }
 
     /**
-     * @return array<Rule|Invocation|string|int>|string|int|null
+     * @return C
      */
-    public function getChildren(): array|string|int|null
+    public function getChildren(): mixed
     {
         return $this->children;
     }

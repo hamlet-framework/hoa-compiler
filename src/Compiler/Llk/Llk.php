@@ -95,16 +95,19 @@ abstract class Llk
                 }
 
                 // Children.
+                /**
+                 * @psalm-suppress MixedAssignment
+                 */
                 $ruleChildren = $rule->getChildren();
 
                 if (null === $ruleChildren) {
                     $arguments['children'] = 'null';
                 } elseif (false === is_array($ruleChildren)) {
+                    /**
+                     * @psalm-suppress MixedArgument
+                     */
                     $arguments['children'] = $escapeRuleName($ruleChildren);
                 } else {
-                    /**
-                     * @psalm-suppress PossiblyInvalidArgument
-                     */
                     $arguments['children'] =
                         '[' .
                         implode(', ', array_map($escapeRuleName, $ruleChildren)) .

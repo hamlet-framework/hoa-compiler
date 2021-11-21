@@ -325,7 +325,7 @@ class Parser
             assert(is_array($children));
             for ($i = count($children) - 1; $i >= 0; --$i) {
                 $nextRule = $children[$i];
-                assert(is_scalar($nextRule));
+                assert(is_string($nextRule) || is_int($nextRule));
                 $this->todo[] = new Ekzit($nextRule, 0);
                 $this->todo[] = new Entry($nextRule, 0);
             }
@@ -349,7 +349,7 @@ class Parser
                 $this->depth
             );
             $nextRule = $children[$nextRuleIndex];
-            assert(is_scalar($nextRule));
+            assert(is_string($nextRule) || is_int($nextRule));
             $this->todo[] = new Ekzit($nextRule, 0);
             $this->todo[] = new Entry($nextRule, 0);
 
@@ -380,7 +380,7 @@ class Parser
                 );
 
                 for ($i = 0; $i < $min; ++$i) {
-                    assert(is_scalar($nextRule));
+                    assert(is_string($nextRule) || is_int($nextRule));
                     $this->todo[] = new Ekzit($nextRule, 0);
                     $this->todo[] = new Entry($nextRule, 0);
                 }
@@ -398,7 +398,7 @@ class Parser
                     $nextRuleIndex,
                     $this->todo
                 );
-                assert(is_scalar($nextRule));
+                assert(is_string($nextRule) || is_int($nextRule));
                 $this->todo[] = new Ekzit($nextRule, 0);
                 $this->todo[] = new Entry($nextRule, 0);
 
