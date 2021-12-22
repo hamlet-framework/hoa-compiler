@@ -4,6 +4,10 @@ namespace Hoa\Compiler\Llk\Rules;
 
 use Hoa\Compiler;
 
+/**
+ * @template C as array<Rule|Invocation|string>|string|int
+ * @extends Rule<C>
+ */
 class Repetition extends Rule
 {
     /**
@@ -20,7 +24,7 @@ class Repetition extends Rule
      * @param string|int $name
      * @param int $min
      * @param int $max
-     * @param array<Rule|Invocation|string>|string|int $children
+     * @param C $children
      * @param string|null $nodeId
      */
     public function __construct(string|int $name, int $min, int $max, array|string|int $children, ?string $nodeId)

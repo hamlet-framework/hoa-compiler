@@ -41,13 +41,14 @@ class Parser
 
     /**
      * Lexer iterator.
+     * @var Buffer<mixed,\Hoa\Compiler\Llk\Token>|Lookahead<mixed,\Hoa\Compiler\Llk\Token>|null
      */
     protected Buffer|Lookahead|null $tokenSequence = null;
 
     /**
      * Possible token causing an error.
      */
-    protected ?array $_errorToken = null;
+    protected ?\Hoa\Compiler\Llk\Token $_errorToken = null;
 
     /**
      * Trace of activated rules.
@@ -128,7 +129,7 @@ class Parser
             $out = $this->unfold();
 
             if (null !== $out &&
-                'EOF' === $this->tokenSequence->current()['token']) {
+                'EOF' === $this->tokenSequence->current()->token) {
                 break;
             }
 
@@ -144,7 +145,7 @@ class Parser
 
                 assert($token !== null);
 
-                $offset = $token['offset'];
+                $offset = $token->offset;
 
                 $line = 1;
                 $column = 1;
@@ -169,8 +170,8 @@ class Parser
                 $message = sprintf(
                     'Unexpected token "%s" (%s) at line %d and column %d:' .
                     "\n" . '%s' . "\n" . str_repeat(' ', $column - 1) . '↑',
-                    $token['value'],
-                    $token['token'],
+                    $token->value,
+                    $token->token,
                     $line,
                     $column,
                     $text
@@ -228,7 +229,6 @@ class Parser
      * @param Rule $currentRule Current rule.
      * @param string|int $nextRuleIndex Next rule index.
      * @return bool
-     * @psalm-suppress MixedArrayAccess
      * @psalm-suppress MixedAssignment
      */
     protected function _parse(Rule $currentRule, string|int $nextRuleIndex): bool
@@ -236,13 +236,13 @@ class Parser
         assert($this->tokenSequence !== null);
 
         if ($currentRule instanceof Token) {
-            $name = $this->tokenSequence->current()['token'];
+            $name = $this->tokenSequence->current()->token;
 
             if ($currentRule->getTokenName() !== $name) {
                 return false;
             }
 
-            $value = $this->tokenSequence->current()['value'];
+            $value = $this->tokenSequence->current()->value;
 
             if (0 <= $unification = $currentRule->getUnificationIndex()) {
                 for ($skip = 0, $i = count($this->trace) - 1; $i >= 0; --$i) {
@@ -273,16 +273,11 @@ class Parser
                 }
             }
 
-            $namespace = $this->tokenSequence->current()['namespace'];
+            $namespace = $this->tokenSequence->current()->namespace;
             $zzeRule = clone $currentRule;
-            assert(is_string($value));
             $zzeRule->setValue($value);
-            assert(is_string($namespace));
             $zzeRule->setNamespace($namespace);
 
-            /**
-             * @psalm-suppress MixedArrayOffset
-             */
             if (isset($this->tokens[$namespace][$name])) {
                 $zzeRule->setRepresentation($this->tokens[$namespace][$name]);
             } else {

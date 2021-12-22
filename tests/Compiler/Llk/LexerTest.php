@@ -5,10 +5,20 @@ namespace Hoa\Compiler\Llk;
 use Generator;
 use Hoa\Compiler\Exceptions\LexerException;
 use Hoa\Compiler\Exceptions\UnrecognizedTokenException;
+use Iterator;
 use PHPUnit\Framework\TestCase;
 
 class LexerTest extends TestCase
 {
+    /**
+     * @param Iterator<Token> $iterator
+     * @return array
+     */
+    static function token_iterator_to_array(Iterator $iterator): array
+    {
+        return array_map(fn (Token $token) => $token->toArray(), iterator_to_array($iterator));
+    }
+
     public function test_lex_me_result_is_a_generator(): void
     {
         $lexer = new Lexer;
@@ -46,7 +56,7 @@ class LexerTest extends TestCase
             'namespace' => 'default',
             'keep'      => true,
             'offset'    => 0
-        ], $current);
+        ], $current->toArray());
 
         $result->next();
         $current = $result->current();
@@ -57,7 +67,7 @@ class LexerTest extends TestCase
             'namespace' => 'default',
             'keep'      => true,
             'offset'    => 3
-        ], $current);
+        ], $current->toArray());
 
         $result->next();
         $current = $result->current();
@@ -68,7 +78,7 @@ class LexerTest extends TestCase
             'namespace' => 'default',
             'keep'      => true,
             'offset'    => 6
-        ], $current);
+        ], $current->toArray());
 
         $result->next();
         $current = $result->current();
@@ -79,7 +89,7 @@ class LexerTest extends TestCase
             'namespace' => 'default',
             'keep'      => true,
             'offset'    => 9
-        ], $current);
+        ], $current->toArray());
 
         $result->next();
         $current = $result->current();
@@ -105,7 +115,7 @@ class LexerTest extends TestCase
             'namespace' => 'default',
             'keep'      => true,
             'offset'    => 0
-        ], $result->current());
+        ], $result->current()->toArray());
 
         $this->expectException(UnrecognizedTokenException::class);
         $this->expectExceptionMessage(
@@ -168,7 +178,7 @@ class LexerTest extends TestCase
                 'keep'      => true,
                 'offset'    => 12
             ]
-        ], iterator_to_array($result));
+        ], self::token_iterator_to_array($result));
     }
 
     public function test_namespace_with_shift(): void
@@ -223,7 +233,7 @@ class LexerTest extends TestCase
                 'keep'      => true,
                 'offset'    => 12
             ]
-        ], iterator_to_array($result));
+        ], self::token_iterator_to_array($result));
     }
 
     public function test_namespace_shift_too_much(): void
@@ -319,7 +329,7 @@ class LexerTest extends TestCase
                 'keep'      => true,
                 'offset'    => 18
             ]
-        ], iterator_to_array($result));
+        ], self::token_iterator_to_array($result));
     }
 
     public function test_match_empty_lexeme(): void
@@ -379,7 +389,7 @@ class LexerTest extends TestCase
                 'keep'      => true,
                 'offset'    => 5
             ]
-        ], iterator_to_array($result));
+        ], self::token_iterator_to_array($result));
     }
 
     public function test_unicode_disabled(): void

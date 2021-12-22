@@ -35,6 +35,7 @@ final class Analyzer
 
     /**
      * Lexer iterator.
+     * @var ?Lookahead<mixed,\Hoa\Compiler\Llk\Token>
      */
     protected ?Lookahead $lexer = null;
 
@@ -136,7 +137,6 @@ final class Analyzer
      * Implementation of “choice”.
      * @psalm-suppress PossiblyNullReference
      * @psalm-suppress PossiblyNullArrayAccess
-     * @psalm-suppress MixedArrayAccess
      */
     protected function choice(?string &$pNodeId): string|int|null
     {
@@ -158,7 +158,7 @@ final class Analyzer
         $others = false;
 
         // … ( ::or:: concatenation() )*
-        while ($this->lexer->current()['token'] === 'or') {
+        while ($this->lexer->current()->token === 'or') {
             $this->lexer->next();
             $others = true;
             $nNodeId = $pNodeId;
@@ -224,9 +224,7 @@ final class Analyzer
      * Implementation of “repetition”.
      * @throws Exception
      * @psalm-suppress PossiblyNullReference
-     * @psalm-suppress MixedArrayAccess
      * @psalm-suppress UnusedVariable
-     * @psalm-suppress MixedArgument
      */
     protected function repetition(?string &$pNodeId): string|int|null
     {
@@ -238,7 +236,7 @@ final class Analyzer
         }
 
         // … quantifier()?
-        switch ($this->lexer->current()['token']) {
+        switch ($this->lexer->current()->token) {
             case 'zero_or_one':
                 $min = 0;
                 $max = 1;
@@ -261,7 +259,7 @@ final class Analyzer
                 break;
 
             case 'n_to_m':
-                $handle = trim($this->lexer->current()['value'], '{}');
+                $handle = trim($this->lexer->current()->value, '{}');
                 $nm = explode(',', $handle);
                 $min = (int)trim($nm[0]);
                 $max = (int)trim($nm[1]);
@@ -271,20 +269,20 @@ final class Analyzer
 
             case 'zero_to_m':
                 $min = 0;
-                $max = (int)trim($this->lexer->current()['value'], '{,}');
+                $max = (int)trim($this->lexer->current()->value, '{,}');
                 $this->lexer->next();
 
                 break;
 
             case 'n_or_more':
-                $min = (int)trim($this->lexer->current()['value'], '{,}');
+                $min = (int)trim($this->lexer->current()->value, '{,}');
                 $max = -1;
                 $this->lexer->next();
 
                 break;
 
             case 'exactly_n':
-                $handle = trim($this->lexer->current()['value'], '{}');
+                $handle = trim($this->lexer->current()->value, '{}');
                 $min = (int)$handle;
                 $max = $min;
                 $this->lexer->next();
@@ -293,11 +291,8 @@ final class Analyzer
         }
 
         // … <node>?
-        if ('node' === $this->lexer->current()['token']) {
-            /**
-             * @psalm-suppress MixedAssignment
-             */
-            $pNodeId = $this->lexer->current()['value'];
+        if ('node' === $this->lexer->current()->token) {
+            $pNodeId = $this->lexer->current()->value;
             $this->lexer->next();
         }
 
@@ -332,13 +327,11 @@ final class Analyzer
      * @psalm-suppress PossiblyFalseArgument
      * @psalm-suppress PossiblyFalseOperand
      * @psalm-suppress PossiblyNullReference
-     * @psalm-suppress MixedArrayAccess
-     * @psalm-suppress MixedArgument
      * @throws Exception
      */
     protected function simple(?string &$pNodeId): string|int|null
     {
-        if ('capturing_' === $this->lexer->current()['token']) {
+        if ('capturing_' === $this->lexer->current()->token) {
             $this->lexer->next();
             $rule = $this->choice($pNodeId);
 
@@ -346,7 +339,7 @@ final class Analyzer
                 return null;
             }
 
-            if ('_capturing' != $this->lexer->current()['token']) {
+            if ('_capturing' != $this->lexer->current()->token) {
                 return null;
             }
 
@@ -355,8 +348,8 @@ final class Analyzer
             return $rule;
         }
 
-        if ('skipped' === $this->lexer->current()['token']) {
-            $tokenName = trim($this->lexer->current()['value'], ':');
+        if ('skipped' === $this->lexer->current()->token) {
+            $tokenName = trim($this->lexer->current()->value, ':');
 
             if (str_ends_with($tokenName, ']')) {
                 $uId = (int)substr($tokenName, strpos($tokenName, '[') + 1, -1);
@@ -389,8 +382,8 @@ final class Analyzer
             return $name;
         }
 
-        if ('kept' === $this->lexer->current()['token']) {
-            $tokenName = trim($this->lexer->current()['value'], '<>');
+        if ('kept' === $this->lexer->current()->token) {
+            $tokenName = trim($this->lexer->current()->value, '<>');
 
             if (str_ends_with($tokenName, ']')) {
                 $uId = (int)substr($tokenName, strpos($tokenName, '[') + 1, -1);
@@ -430,8 +423,8 @@ final class Analyzer
             return $name;
         }
 
-        if ('named' === $this->lexer->current()['token']) {
-            $tokenName = rtrim($this->lexer->current()['value'], '()');
+        if ('named' === $this->lexer->current()->token) {
+            $tokenName = rtrim($this->lexer->current()->value, '()');
 
             assert($this->_rules !== null);
 
@@ -442,7 +435,7 @@ final class Analyzer
             }
 
             if (0 === $this->lexer->key() &&
-                'EOF' === $this->lexer->getNext()['token']) {
+                'EOF' === $this->lexer->getNext()->token) {
                 $name = $this->_transitionalRuleCounter++;
                 $this->_parsedRules[$name] = new Concatenation(
                     $name,

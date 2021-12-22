@@ -49,9 +49,10 @@ class Lexer
     /**
      * Text tokenizer: splits the text in parameter in an ordered array of tokens.
      *
+     * @todo replace array{token:string,value:string,length:int,namespace:string,keep:bool,offset:int} with token
      * @param string $text Text to tokenize.
      * @param array<string,array<string,string>> $tokens Tokens to be returned.
-     * @return Generator<array{token:string,value:string,length:int,namespace:string,keep:bool,offset:int}>
+     * @return Generator<Token>
      * @throws UnrecognizedTokenException
      */
     public function lexMe(string $text, array $tokens): Generator
@@ -105,19 +106,12 @@ class Lexer
             }
             if (true === $nextToken['keep']) {
                 $nextToken['offset'] = $offset;
-                yield $nextToken;
+                yield new Token($nextToken['token'], $nextToken['value'], $nextToken['length'], $nextToken['namespace'], $nextToken['keep'], $nextToken['offset']);
             }
             $offset += strlen($nextToken['value']);
         }
 
-        yield [
-            'token'     => 'EOF',
-            'value'     => 'EOF',
-            'length'    => 0,
-            'namespace' => 'default',
-            'keep'      => true,
-            'offset'    => $offset
-        ];
+        yield Token::eof($offset);
     }
 
     /**

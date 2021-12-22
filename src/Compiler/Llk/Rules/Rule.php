@@ -48,9 +48,9 @@ abstract class Rule
     /**
      * @param string|int $name
      * @param C $children
-     * @param string|null $nodeId
+     * @param ?string $nodeId
      */
-    public function __construct(protected string|int $name, mixed $children, string|null $nodeId = null)
+    public function __construct(protected string|int $name, mixed $children, ?string $nodeId = null)
     {
         $this->children = $children;
         $this->setNodeId($nodeId);

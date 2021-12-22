@@ -3,6 +3,7 @@
 namespace Hoa\Iterator;
 
 use Iterator;
+use RuntimeException;
 
 /**
  * @template I
@@ -46,19 +47,25 @@ final class Lookahead implements Iterator
 
     /**
      * Return the current element.
-     * @return T|null
+     * @return T
      */
     public function current(): mixed
     {
+        if ($this->current === null) {
+            throw new RuntimeException('Invalid state');
+        }
         return $this->current;
     }
 
     /**
      * Return the key of the current element.
-     * @return I|null
+     * @return I
      */
     public function key(): mixed
     {
+        if ($this->key === null) {
+            throw new RuntimeException('Invalid state');
+        }
         return $this->key;
     }
 
@@ -107,19 +114,27 @@ final class Lookahead implements Iterator
 
     /**
      * Get next value.
-     * @return T|null
+     * @return T
      */
     public function getNext(): mixed
     {
-        return $this->getInnerIterator()->current();
+        $current = $this->getInnerIterator()->current();
+        if ($current === null) {
+            throw new \RuntimeException('Invalid state');
+        }
+        return $current;
     }
 
     /**
      * Get next key.
-     * @return I|null
+     * @return I
      */
     public function getNextKey(): mixed
     {
-        return $this->getInnerIterator()->key();
+        $key = $this->getInnerIterator()->key();
+        if ($key === null) {
+            throw new \RuntimeException('Invalid state');
+        }
+        return $key;
     }
 }
