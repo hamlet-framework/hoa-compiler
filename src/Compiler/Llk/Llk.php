@@ -29,7 +29,7 @@ abstract class Llk
         $pragmas = [];
         static::parsePP($pp, $tokens, $rawRules, $pragmas, $path);
 
-        $ruleAnalyzer = new Rules\Analyzer($tokens);
+        $ruleAnalyzer = new Rules\AnalyzerRule($tokens);
         $rules = $ruleAnalyzer->analyzeRules($rawRules);
         return new Parser($tokens, $rules, $pragmas);
     }
@@ -82,11 +82,11 @@ abstract class Llk
             // Name.
             $arguments['name'] = $escapeRuleName($rule->getName());
 
-            if ($rule instanceof Rules\Token) {
-                // Token name.
+            if ($rule instanceof Rules\TokenRule) {
+                // TokenRule name.
                 $arguments['tokenName'] = '\'' . $rule->getTokenName() . '\'';
             } else {
-                if ($rule instanceof Rules\Repetition) {
+                if ($rule instanceof Rules\RepetitionRule) {
                     // Minimum.
                     $arguments['min'] = $rule->getMin();
 
@@ -124,7 +124,7 @@ abstract class Llk
                 $arguments['nodeId'] = '\'' . $nodeId . '\'';
             }
 
-            if ($rule instanceof Rules\Token) {
+            if ($rule instanceof Rules\TokenRule) {
                 // Unification.
                 $arguments['unification'] = $rule->getUnificationIndex();
 

@@ -15,7 +15,7 @@ class TokenTest extends TestCase
         $nodeId = 'baz';
         $unification = 0;
 
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
         $this->assertEquals($name, $token->getName());
         $this->assertEquals($tokenName, $token->getTokenName());
@@ -32,7 +32,7 @@ class TokenTest extends TestCase
         $unification = 0;
         $kept = true;
 
-        $token = new Token($name, $tokenName, $nodeId, $unification, $kept);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification, $kept);
 
         $this->assertEquals($name, $token->getName());
         $this->assertEquals($tokenName, $token->getTokenName());
@@ -48,7 +48,7 @@ class TokenTest extends TestCase
         $nodeId = 'baz';
         $unification = 0;
         $namespace = 'qux';
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
         $this->assertNull($token->setNamespace($namespace));
         $this->assertEquals($namespace, $token->getNamespace());
@@ -65,7 +65,7 @@ class TokenTest extends TestCase
         $nodeId = 'baz';
         $unification = 0;
         $representation = 'qux';
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
         $this->assertNull($token->setRepresentation($representation));
         $this->assertEquals($representation, $token->getRepresentation());
@@ -78,7 +78,7 @@ class TokenTest extends TestCase
         $nodeId = 'baz';
         $unification = 0;
         $representation = 'qux';
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
         $token->setRepresentation($representation);
 
         $ast = $token->getAST();
@@ -100,7 +100,7 @@ class TokenTest extends TestCase
         $nodeId = 'baz';
         $unification = 0;
         $value = 'qux';
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
         $this->assertNull($token->setValue($value));
         $this->assertEquals($value, $token->getValue());
@@ -112,7 +112,7 @@ class TokenTest extends TestCase
         $tokenName = 'bar';
         $nodeId = 'baz';
         $unification = 0;
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
         $this->assertFalse($token->isKept());
         $this->assertFalse($token->setKept(true));
@@ -126,7 +126,7 @@ class TokenTest extends TestCase
         $nodeId = 'baz';
         $unification = 42;
 
-        $token = new Token($name, $tokenName, $nodeId, $unification);
+        $token = new TokenRule($name, $tokenName, $nodeId, $unification);
         $this->assertEquals($unification, $token->getUnificationIndex());
     }
 }

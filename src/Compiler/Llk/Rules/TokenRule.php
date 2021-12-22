@@ -8,7 +8,7 @@ use Hoa\Compiler\Llk\Llk;
 use Hoa\Compiler\Llk\Parser;
 use Hoa\Compiler\Llk\TreeNode;
 
-final class Token extends Rule
+final class TokenRule extends Rule
 {
     /**
      * LL(k) compiler of hoa://Library/Regex/Regex.pp.
@@ -25,13 +25,13 @@ final class Token extends Rule
     protected ?TreeNode $ast = null;
 
     /**
-     * Token value.
+     * TokenRule value.
      */
     protected ?string $value = null;
 
     /**
      * @param string|int $name Name.
-     * @param string $tokenName Token name.
+     * @param string $tokenName TokenRule name.
      * @param string|null $nodeId Node ID.
      * @param int $unification Unification index.
      * @param bool $kept Whether the token is kept or not in the AST.
@@ -83,14 +83,14 @@ final class Token extends Rule
      */
     public function getAST(): TreeNode
     {
-        if (!Token::$regexCompiler) {
-            Token::$regexCompiler = Llk::load(__DIR__ . '/../../../Grammars/Regex.pp');
+        if (!TokenRule::$regexCompiler) {
+            TokenRule::$regexCompiler = Llk::load(__DIR__ . '/../../../Grammars/Regex.pp');
         }
         if (!$this->ast) {
             if (!$this->regex) {
                 throw new Exception('Not initialized.');
             }
-            $this->ast = Token::$regexCompiler->parse($this->regex);
+            $this->ast = TokenRule::$regexCompiler->parse($this->regex);
         }
         return $this->ast;
     }

@@ -2,6 +2,6 @@
 
 namespace Hoa\Compiler\Llk\Rules;
 
-class Ekzit extends Invocation
+class ChoiceRule extends Rule
 {
 }

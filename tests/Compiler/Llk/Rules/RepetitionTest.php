@@ -14,7 +14,7 @@ class RepetitionTest extends TestCase
         $max = 42;
         $children = [];
         $id = 'bar';
-        $repetition = new Repetition($name, $min, $max, $children, $id);
+        $repetition = new RepetitionRule($name, $min, $max, $children, $id);
 
         $this->assertEquals($name, $repetition->getName());
         $this->assertEquals($min, $repetition->getMin());
@@ -31,7 +31,7 @@ class RepetitionTest extends TestCase
         $max = 42;
         $children = [];
         $id = 'bar';
-        $repetition = new Repetition($name, $min, $max, $children, $id);
+        $repetition = new RepetitionRule($name, $min, $max, $children, $id);
 
         $this->assertEquals(0, $repetition->getMin());
         $this->assertEquals($max, $repetition->getMax());
@@ -48,7 +48,7 @@ class RepetitionTest extends TestCase
 
         $this->expectException(RuleException::class);
         $this->expectExceptionMessage('Cannot repeat with a min (2) greater than max (1).');
-        new Repetition($name, $min, $max, $children, $id);
+        new RepetitionRule($name, $min, $max, $children, $id);
     }
 
     public function test_constructor_infinite_max(): void
@@ -58,7 +58,7 @@ class RepetitionTest extends TestCase
         $max = -1;
         $children = [];
         $id = 'bar';
-        $repetition = new Repetition($name, $min, $max, $children, $id);
+        $repetition = new RepetitionRule($name, $min, $max, $children, $id);
 
         $this->assertEquals($min, $repetition->getMin());
         $this->assertEquals($max, $repetition->getMax());

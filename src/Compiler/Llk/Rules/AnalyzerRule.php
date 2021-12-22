@@ -7,7 +7,7 @@ use Hoa\Compiler\Exceptions\Exception;
 use Hoa\Compiler\Llk\Lexer;
 use Hoa\Iterator\Lookahead;
 
-final class Analyzer
+final class AnalyzerRule
 {
     /**
      * PP lexemes.
@@ -89,7 +89,7 @@ final class Analyzer
         $lexer = new Lexer();
 
         foreach ($rules as $key => $value) {
-            $this->lexer = new Lookahead($lexer->lexMe($value, Analyzer::$_ppLexemes));
+            $this->lexer = new Lookahead($lexer->lexMe($value, AnalyzerRule::$_ppLexemes));
             $this->lexer->rewind();
 
             $this->_ruleName = $key;
@@ -182,7 +182,7 @@ final class Analyzer
         }
 
         $name = $this->_transitionalRuleCounter++;
-        $this->_parsedRules[$name] = new Choice($name, $children);
+        $this->_parsedRules[$name] = new ChoiceRule($name, $children);
 
         return $name;
     }
@@ -215,7 +215,7 @@ final class Analyzer
         }
 
         $name = $this->_transitionalRuleCounter++;
-        $this->_parsedRules[$name] = new Concatenation($name, $children);
+        $this->_parsedRules[$name] = new ConcatenationRule($name, $children);
 
         return $name;
     }
@@ -311,7 +311,7 @@ final class Analyzer
         }
 
         $name = $this->_transitionalRuleCounter++;
-        $this->_parsedRules[$name] = new Repetition(
+        $this->_parsedRules[$name] = new RepetitionRule(
             $name,
             $min,
             $max,
@@ -371,12 +371,12 @@ final class Analyzer
             }
 
             if (false == $exists) {
-                $message = sprintf('Token ::%s:: does not exist in rule %s.', $tokenName, $this->_ruleName ?? 'unknown');
+                $message = sprintf('TokenRule ::%s:: does not exist in rule %s.', $tokenName, $this->_ruleName ?? 'unknown');
                 throw new Exception($message, 3);
             }
 
             $name = $this->_transitionalRuleCounter++;
-            $this->_parsedRules[$name] = new Token((string)$name, $tokenName, null, $uId, false);
+            $this->_parsedRules[$name] = new TokenRule((string)$name, $tokenName, null, $uId, false);
             $this->lexer->next();
 
             return $name;
@@ -405,12 +405,12 @@ final class Analyzer
             }
 
             if (false == $exists) {
-                $message = sprintf('Token <%s> does not exist in rule %s.', $tokenName, $this->_ruleName ?? 'unknown');
+                $message = sprintf('TokenRule <%s> does not exist in rule %s.', $tokenName, $this->_ruleName ?? 'unknown');
                 throw new Exception($message, 4);
             }
 
             $name = $this->_transitionalRuleCounter++;
-            $token = new Token(
+            $token = new TokenRule(
                 $name,
                 $tokenName,
                 null,
@@ -437,7 +437,7 @@ final class Analyzer
             if (0 === $this->lexer->key() &&
                 'EOF' === $this->lexer->getNext()->token) {
                 $name = $this->_transitionalRuleCounter++;
-                $this->_parsedRules[$name] = new Concatenation(
+                $this->_parsedRules[$name] = new ConcatenationRule(
                     $name,
                     [$tokenName],
                     null

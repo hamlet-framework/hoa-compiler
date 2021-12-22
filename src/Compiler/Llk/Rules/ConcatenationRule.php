@@ -2,6 +2,6 @@
 
 namespace Hoa\Compiler\Llk\Rules;
 
-class Choice extends Rule
+class ConcatenationRule extends Rule
 {
 }

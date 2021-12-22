@@ -5,10 +5,10 @@ namespace Hoa\Compiler\Llk\Rules;
 use Hoa\Compiler;
 
 /**
- * @template C as array<Rule|Invocation|string>|string|int
+ * @template C as array<Rule|InvocationRule|string>|string|int
  * @extends Rule<C>
  */
-class Repetition extends Rule
+class RepetitionRule extends Rule
 {
     /**
      * Minimum bound.

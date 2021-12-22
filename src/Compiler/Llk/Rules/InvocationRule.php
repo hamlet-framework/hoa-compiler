@@ -2,7 +2,7 @@
 
 namespace Hoa\Compiler\Llk\Rules;
 
-abstract class Invocation
+abstract class InvocationRule
 {
     /**
      * Whether the rule is transitional or not (i.e. not declared in the grammar but created by the analyzer).
@@ -12,7 +12,7 @@ abstract class Invocation
     /**
      * @param string|int $rule Rule.
      * @param int|string $data Data.
-     * @param ?array<Invocation> $todo Piece of todo sequence.
+     * @param ?array<InvocationRule> $todo Piece of todo sequence.
      * @param int $depth Depth in the trace.
      */
     public function __construct(
@@ -42,7 +42,7 @@ abstract class Invocation
 
     /**
      * Get todo sequence.
-     * @return ?array<Invocation>
+     * @return ?array<InvocationRule>
      */
     public function getTodo(): ?array
     {

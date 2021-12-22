@@ -10,7 +10,7 @@ class InvocationTest extends TestCase
     {
         $rule = 'foo';
         $data = 'bar';
-        $invocation = new class($rule, $data) extends Invocation {
+        $invocation = new class($rule, $data) extends InvocationRule {
         };
 
         $this->assertEquals($rule, $invocation->getRule());
@@ -25,7 +25,7 @@ class InvocationTest extends TestCase
         $rule = 'foo';
         $data = 'bar';
         $todo = ['baz', 'qux'];
-        $invocation = new class($rule, $data, $todo) extends Invocation {
+        $invocation = new class($rule, $data, $todo) extends InvocationRule {
         };
 
         $this->assertEquals($rule, $invocation->getRule());
@@ -41,7 +41,7 @@ class InvocationTest extends TestCase
         $data = 'bar';
         $todo = ['baz', 'qux'];
         $depth = 42;
-        $invocation = new class($rule, $data, $todo, $depth) extends Invocation {
+        $invocation = new class($rule, $data, $todo, $depth) extends InvocationRule {
         };
 
         $this->assertEquals($rule, $invocation->getRule());
@@ -56,7 +56,7 @@ class InvocationTest extends TestCase
         $rule = 42;
         $data = 'bar';
         $depth = 42;
-        $invocation = new class($rule, $data) extends Invocation {
+        $invocation = new class($rule, $data) extends InvocationRule {
         };
 
         $this->assertEquals(-1, $invocation->setDepth($depth));
@@ -67,7 +67,7 @@ class InvocationTest extends TestCase
     {
         $rule = 7;
         $data = 'bar';
-        $invocation = new class($rule, $data) extends Invocation {
+        $invocation = new class($rule, $data) extends InvocationRule {
         };
 
         $this->assertTrue($invocation->isTransitional());
@@ -77,7 +77,7 @@ class InvocationTest extends TestCase
     {
         $rule = 'a';
         $data = 'bar';
-        $invocation = new class($rule, $data) extends Invocation {
+        $invocation = new class($rule, $data) extends InvocationRule {
         };
 
         $this->assertFalse($invocation->isTransitional());

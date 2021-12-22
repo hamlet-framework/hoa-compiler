@@ -2,6 +2,6 @@
 
 namespace Hoa\Compiler\Llk\Rules;
 
-class Concatenation extends Rule
+class ExitRule extends InvocationRule
 {
 }

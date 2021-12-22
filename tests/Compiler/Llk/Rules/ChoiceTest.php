@@ -8,7 +8,7 @@ class ChoiceTest extends TestCase
 {
     public function test_case_is_a_rule(): void
     {
-        $choice = new Choice('foo', ['bar']);
+        $choice = new ChoiceRule('foo', ['bar']);
 
         $this->assertEquals('foo', $choice->getName());
     }
