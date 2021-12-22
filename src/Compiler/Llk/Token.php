@@ -11,7 +11,8 @@ final class Token
         public readonly string $namespace,
         public readonly bool $keep,
         public readonly int $offset,
-    ) {}
+    ) {
+    }
 
     public static function eof(int $offset): Token
     {
