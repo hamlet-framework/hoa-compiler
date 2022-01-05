@@ -20,8 +20,8 @@ abstract class Llk
     {
         $grammar = file_get_contents($path);
         if (empty($grammar)) {
-            $message = 'The grammar is empty';
-            throw new Exception($message . '.', 0);
+            $message = sprintf('The grammar is empty at "%s"', $path);
+            throw new Exception($message, 0);
         }
 
         [$tokens, $rawRules, $pragmas] = static::parseGrammar($grammar, $path);

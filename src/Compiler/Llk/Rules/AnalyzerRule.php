@@ -408,7 +408,8 @@ final class AnalyzerRule
         if (str_ends_with($tokenName, ']')) {
             $openBracketPosition = strpos($tokenName, '[');
             if ($openBracketPosition === false) {
-                throw new Exception('Malformed token name "' . $tokenName . '"');
+                $message = sprintf('Malformed token name "%s"', $tokenName);
+                throw new Exception($message);
             }
             $tokenName = substr($tokenName, 0, $openBracketPosition);
             $unificationId = (int)substr($tokenName, $openBracketPosition + 1, -1);

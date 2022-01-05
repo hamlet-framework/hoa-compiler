@@ -63,6 +63,6 @@ class RepetitionRule extends Rule
      */
     public function isInfinite(): bool
     {
-        return $this->getMax() === -1;
+        return $this->max == -1;
     }
 }

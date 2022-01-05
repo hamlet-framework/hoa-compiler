@@ -127,7 +127,7 @@ class LlkTest extends TestCase
     public function test_load_empty(): void
     {
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('The grammar is empty.');
+        $this->expectExceptionMessage('The grammar is empty at');
         Llk::load(__DIR__ . '/../../Grammars/Empty.pp');
     }
 
