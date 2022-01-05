@@ -18,16 +18,13 @@ abstract class Llk
      */
     public static function load(string $path): Parser
     {
-        $pp = file_get_contents($path);
-        if (empty($pp)) {
+        $grammar = file_get_contents($path);
+        if (empty($grammar)) {
             $message = 'The grammar is empty';
             throw new Exception($message . '.', 0);
         }
 
-        $tokens = [];
-        $rawRules = [];
-        $pragmas = [];
-        static::parsePP($pp, $tokens, $rawRules, $pragmas, $path);
+        [$tokens, $rawRules, $pragmas] = static::parseGrammar($grammar, $path);
 
         $ruleAnalyzer = new Rules\AnalyzerRule($tokens);
         $rules = $ruleAnalyzer->analyzeRules($rawRules);
@@ -200,14 +197,11 @@ abstract class Llk
      * Parse the grammar description language.
      *
      * @param string $pp Grammar description.
-     * @param array<string,array<string,string>> $tokens Extracted tokens.
-     * @param array<string,string> $rules Extracted raw rules.
-     * @param array<string,string|int|bool> $pragmas Extracted raw pragmas.
      * @param string $streamName The name of the stream containing the grammar.
-     * @return void
+     * @return array{array<string,array<string,string>>,array<string,string>,array<string,string|int|bool>}
      * @throws Exception
      */
-    public static function parsePP(string $pp, array &$tokens, array &$rules, array &$pragmas, string $streamName): void
+    public static function parseGrammar(string $pp, string $streamName): array
     {
         $lines = explode("\n", $pp);
         $pragmas = [];
@@ -307,5 +301,8 @@ abstract class Llk
 
             $rules[$ruleName] = $rule;
         }
+
+        // @todo replace with an immutable object
+        return [$tokens, $rules, $pragmas];
     }
 }

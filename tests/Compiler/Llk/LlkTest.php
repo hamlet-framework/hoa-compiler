@@ -16,10 +16,8 @@ class LlkTest extends TestCase
               '%skip  sourceNS1:foobar4  bazqux4' . "\n" .
               '%skip  sourceNS1:foobar5  bazqux5' . "\n" .
               '%skip  sourceNS2:foobar6  bazqux6' . "\n";
-        $tokens = [];
-        $rules = [];
-        $pragmas = [];
-        Llk::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo');
+
+        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
 
         $this->assertEquals([
             'default' => [
@@ -42,10 +40,7 @@ class LlkTest extends TestCase
               '%token  sourceNS1:foobar2  bazqux2' . "\n" .
               '%token  sourceNS2:foobar3  bazqux3  -> destinationNS' . "\n" .
               '%token  foobar4            barqux4  -> destinationNS';
-        $tokens = [];
-        $rules = [];
-        $pragmas = [];
-        Llk::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo');
+        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
 
         $this->assertEquals([
             'default' => [
@@ -70,10 +65,7 @@ class LlkTest extends TestCase
               '%pragma  numby   42' . "\n" .
               '%pragma  foobar  hello' . "\n" .
               '%pragma  bazqux  "world!"  ' . "\n";
-        $tokens = [];
-        $rules = [];
-        $pragmas = [];
-        Llk::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo');
+        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
 
         $this->assertEquals(['default' => []], $tokens);
         $this->assertEmpty($rules);
@@ -90,9 +82,6 @@ class LlkTest extends TestCase
     {
         $pp = '// shift line' . "\n" .
               '%foobar baz qux' . "\n";
-        $tokens = [];
-        $rules = [];
-        $pragmas = [];
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(
@@ -100,7 +89,7 @@ class LlkTest extends TestCase
             '    %foobar baz qux' . "\n" .
             'in file streamFoo at line 2.'
         );
-        Llk::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo');
+        Llk::parseGrammar($pp, 'streamFoo');
     }
 
     public function test_parse_rules(): void
@@ -113,10 +102,7 @@ class LlkTest extends TestCase
               "\t" . 'single tab' . "\n" .
               'ruleC:' . "\n" .
               "\t\t" . 'many tabs' . "\n";
-        $tokens = [];
-        $rules = [];
-        $pragmas = [];
-        Llk::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo');
+        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
 
         $this->assertEquals(['default' => []], $tokens);
         $this->assertEquals([
@@ -131,10 +117,7 @@ class LlkTest extends TestCase
     {
         $pp = '// Hello,' . "\n" .
               '//   World!';
-        $tokens = [];
-        $rules = [];
-        $pragmas = [];
-        Llk::parsePP($pp, $tokens, $rules, $pragmas, 'streamFoo');
+        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
 
         $this->assertEquals(['default' => []], $tokens);
         $this->assertEmpty($rules);

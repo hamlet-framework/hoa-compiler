@@ -130,49 +130,49 @@ class Lexer
             }
 
             $out = $this->matchLexeme($lexeme, $regex, $offset);
+            if ($out === null) {
+                continue;
+            }
+            $out['namespace'] = $this->lexerState;
+            $out['keep'] = $lexeme !== 'skip';
 
-            if ($out !== null) {
-                $out['namespace'] = $this->lexerState;
-                $out['keep'] = 'skip' !== $lexeme;
+            if ($nextState !== $this->lexerState) {
+                $shift = false;
 
-                if ($nextState !== $this->lexerState) {
-                    $shift = false;
+                if ($this->namespaceStack !== null &&
+                    preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches) !== 0) {
+                    $i = isset($matches[1]) ? intval($matches[1]) : 1;
 
-                    if ($this->namespaceStack !== null &&
-                        preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches) !== 0) {
-                        $i = isset($matches[1]) ? intval($matches[1]) : 1;
-
-                        if ($i > ($c = count($this->namespaceStack))) {
-                            $message = sprintf('Cannot shift namespace %d-times, from token ' .
-                                '%s in namespace %s, because the stack ' .
-                                'contains only %d namespaces.', $i, $lexeme, $this->lexerState, $c);
-                            throw new LexerException($message, 1);
-                        }
-
-                        $previousNamespace = null;
-                        while (1 <= $i--) {
-                            $previousNamespace = $this->namespaceStack->pop();
-                        }
-
-                        $nextState = $previousNamespace;
-                        $shift = true;
+                    if ($i > ($c = count($this->namespaceStack))) {
+                        $message = sprintf('Cannot shift namespace %d-times, from token ' .
+                            '%s in namespace %s, because the stack ' .
+                            'contains only %d namespaces.', $i, $lexeme, $this->lexerState, $c);
+                        throw new LexerException($message, 1);
                     }
 
-                    assert(is_string($nextState));
-                    if (!isset($this->tokens[$nextState])) {
-                        $message = sprintf('Namespace %s does not exist, called by token %s in namespace %s.', $nextState, $lexeme, $this->lexerState);
-                        throw new LexerException($message, 2);
+                    $previousNamespace = null;
+                    while (1 <= $i--) {
+                        $previousNamespace = $this->namespaceStack->pop();
                     }
 
-                    if ($this->namespaceStack !== null && !$shift) {
-                        $this->namespaceStack->push($this->lexerState);
-                    }
-
-                    $this->lexerState = $nextState;
+                    $nextState = $previousNamespace;
+                    $shift = true;
                 }
 
-                return $out;
+                assert(is_string($nextState));
+                if (!isset($this->tokens[$nextState])) {
+                    $message = sprintf('Namespace %s does not exist, called by token %s in namespace %s.', $nextState, $lexeme, $this->lexerState);
+                    throw new LexerException($message, 2);
+                }
+
+                if ($this->namespaceStack !== null && !$shift) {
+                    $this->namespaceStack->push($this->lexerState);
+                }
+
+                $this->lexerState = $nextState;
             }
+
+            return $out;
         }
 
         return null;
