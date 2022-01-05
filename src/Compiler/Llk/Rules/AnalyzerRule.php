@@ -44,7 +44,7 @@ final class AnalyzerRule
      * Rules.
      * @var array<string,string>
      */
-    protected ?array $_rules = null;
+    protected array $_rules = [];
 
     /**
      * RuleException name being analyzed.
@@ -319,104 +319,61 @@ final class AnalyzerRule
 
     /**
      * Implementation of “simple”.
-     * @psalm-suppress PossiblyFalseArgument
-     * @psalm-suppress PossiblyFalseOperand
      * @psalm-suppress PossiblyNullReference
      * @throws Exception
      */
     protected function simple(?string &$pNodeId): string|int|null
     {
-        if ('capturing_' === $this->lexer->current()->token) {
+        if ($this->lexer->current()->token === 'capturing_') {
             $this->lexer->next();
             $rule = $this->choice($pNodeId);
 
-            if (null === $rule) {
+            if ($rule === null) {
                 return null;
             }
 
-            if ('_capturing' != $this->lexer->current()->token) {
+            if ($this->lexer->current()->token != '_capturing') {
                 return null;
             }
 
             $this->lexer->next();
-
             return $rule;
         }
 
-        if ('skipped' === $this->lexer->current()->token) {
+        if ($this->lexer->current()->token === 'skipped') {
             $tokenName = trim($this->lexer->current()->value, ':');
-
-            if (str_ends_with($tokenName, ']')) {
-                $uId = (int)substr($tokenName, strpos($tokenName, '[') + 1, -1);
-                $tokenName = substr($tokenName, 0, strpos($tokenName, '['));
-            } else {
-                $uId = -1;
-            }
-
-            $exists = false;
-
-            foreach ($this->tokens as $tokens) {
-                foreach ($tokens as $token => $_) {
-                    if ($token === $tokenName ||
-                        str_contains($token, ':') && substr($token, 0, strpos($token, ':')) === $tokenName) {
-                        $exists = true;
-                        break 2;
-                    }
-                }
-            }
-
-            if (false == $exists) {
+            [$tokenName, $unificationId, $exists] = $this->parseTokenName($tokenName);
+            if (!$exists) {
                 $message = sprintf('TokenRule ::%s:: does not exist in rule %s.', $tokenName, $this->_ruleName ?? 'unknown');
                 throw new Exception($message, 3);
             }
 
             $name = $this->_transitionalRuleCounter++;
-            $this->_parsedRules[$name] = new TokenRule((string)$name, $tokenName, null, $uId, false);
+            $tokenRule = new TokenRule((string)$name, $tokenName, null, $unificationId, false);
+            $this->_parsedRules[$name] = $tokenRule;
             $this->lexer->next();
 
             return $name;
         }
 
-        if ('kept' === $this->lexer->current()->token) {
+        if ($this->lexer->current()->token === 'kept') {
             $tokenName = trim($this->lexer->current()->value, '<>');
-
-            if (str_ends_with($tokenName, ']')) {
-                $uId = (int)substr($tokenName, strpos($tokenName, '[') + 1, -1);
-                $tokenName = substr($tokenName, 0, strpos($tokenName, '['));
-            } else {
-                $uId = -1;
-            }
-
-            $exists = false;
-
-            foreach ($this->tokens as $tokens) {
-                foreach ($tokens as $token => $_) {
-                    if ($token === $tokenName ||
-                        str_contains($token, ':') && substr($token, 0, strpos($token, ':')) === $tokenName) {
-                        $exists = true;
-                        break 2;
-                    }
-                }
-            }
-
-            if (false == $exists) {
+            [$tokenName, $unificationId, $exists] = $this->parseTokenName($tokenName);
+            if (!$exists) {
                 $message = sprintf('TokenRule <%s> does not exist in rule %s.', $tokenName, $this->_ruleName ?? 'unknown');
                 throw new Exception($message, 4);
             }
 
             $name = $this->_transitionalRuleCounter++;
-            $token = new TokenRule($name, $tokenName, null, $uId, true);
-            $this->_parsedRules[$name] = $token;
+            $tokenRule = new TokenRule($name, $tokenName, null, $unificationId, true);
+            $this->_parsedRules[$name] = $tokenRule;
             $this->lexer->next();
 
             return $name;
         }
 
-        if ('named' === $this->lexer->current()->token) {
+        if ($this->lexer->current()->token === 'named') {
             $tokenName = rtrim($this->lexer->current()->value, '()');
-
-            assert($this->_rules !== null);
-
             if (false === array_key_exists($tokenName, $this->_rules) &&
                 false === array_key_exists('#' . $tokenName, $this->_rules)) {
                 $message = sprintf('Cannot call rule %s() in rule %s because it does not exist.', $tokenName, $this->_ruleName ?? 'unknown');
@@ -437,5 +394,33 @@ final class AnalyzerRule
         }
 
         return null;
+    }
+
+    /**
+     * @param string $tokenName
+     * @return array{string,int,bool}
+     */
+    private function parseTokenName(string $tokenName): array
+    {
+        if (str_ends_with($tokenName, ']')) {
+            $openBracketPosition = strpos($tokenName, '[');
+            if ($openBracketPosition === false) {
+                throw new Exception('Malformed token name "' . $tokenName . '"');
+            }
+            $tokenName = substr($tokenName, 0, $openBracketPosition);
+            $unificationId = (int)substr($tokenName, $openBracketPosition + 1, -1);
+        } else {
+            $unificationId = -1;
+        }
+        $exists = false;
+        foreach ($this->tokens as $tokens) {
+            foreach ($tokens as $token => $_) {
+                if ($token == $tokenName || str_starts_with($token, $tokenName . ':')) {
+                    $exists = true;
+                    break 2;
+                }
+            }
+        }
+        return [$tokenName, $unificationId, $exists];
     }
 }

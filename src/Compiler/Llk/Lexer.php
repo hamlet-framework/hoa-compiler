@@ -129,23 +129,23 @@ class Lexer
         $tokenArray = &$this->tokens[$this->lexerState];
 
         foreach ($tokenArray as $lexeme => $bucket) {
-            list($regex, $nextState) = $bucket;
+            [$regex, $nextState] = $bucket;
 
-            if (null === $nextState) {
+            if ($nextState === null) {
                 $nextState = $this->lexerState;
             }
 
             $out = $this->matchLexeme($lexeme, $regex, $offset);
 
-            if (null !== $out) {
+            if ($out !== null) {
                 $out['namespace'] = $this->lexerState;
                 $out['keep'] = 'skip' !== $lexeme;
 
                 if ($nextState !== $this->lexerState) {
                     $shift = false;
 
-                    if (null !== $this->namespaceStack &&
-                        0 !== preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches)) {
+                    if ($this->namespaceStack !== null &&
+                        preg_match('#^__shift__(?:\s*\*\s*(\d+))?$#', $nextState, $matches) !== 0) {
                         $i = isset($matches[1]) ? intval($matches[1]) : 1;
 
                         if ($i > ($c = count($this->namespaceStack))) {
@@ -167,8 +167,7 @@ class Lexer
                     assert(is_string($nextState));
                     if (!isset($this->tokens[$nextState])) {
                         $message = sprintf(
-                            'Namespace %s does not exist, called by token %s ' .
-                            'in namespace %s.',
+                            'Namespace %s does not exist, called by token %s in namespace %s.',
                             $nextState,
                             $lexeme,
                             $this->lexerState

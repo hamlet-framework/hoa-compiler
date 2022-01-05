@@ -87,10 +87,7 @@ final class TokenRule extends Rule
             TokenRule::$regexCompiler = Llk::load(__DIR__ . '/../../../Grammars/Regex.pp');
         }
         if (!$this->ast) {
-            if (!$this->regex) {
-                throw new Exception('Not initialized.');
-            }
-            $this->ast = TokenRule::$regexCompiler->parse($this->regex);
+            $this->ast = TokenRule::$regexCompiler->parse($this->getRepresentation());
         }
         return $this->ast;
     }

@@ -128,8 +128,7 @@ class Parser
         do {
             $out = $this->unfold();
 
-            if (null !== $out &&
-                'EOF' === $this->tokenSequence->current()->token) {
+            if ($out !== null && $this->tokenSequence->current()->token === 'EOF') {
                 break;
             }
 
@@ -207,7 +206,7 @@ class Parser
                 if ($rule instanceof ExitRule) {
                     $rule->setDepth($this->depth);
                     $this->trace[] = $rule;
-                    if (false === $rule->isTransitional()) {
+                    if (!$rule->isTransitional()) {
                         $this->depth--;
                     }
                 } else {
@@ -215,7 +214,7 @@ class Parser
                     $next = $rule->getData();
                     $zeRule = $this->rules[$ruleName];
                     $out = $this->_parse($zeRule, $next);
-                    if ($out === false && $this->backtrack() === false) {
+                    if (!$out && !$this->backtrack()) {
                         return null;
                     }
                 }
@@ -305,16 +304,11 @@ class Parser
 
             return true;
         } elseif ($currentRule instanceof ConcatenationRule) {
-            if (false === $currentRule->isTransitional()) {
+            if (!$currentRule->isTransitional()) {
                 ++$this->depth;
             }
 
-            $this->trace[] = new Entry(
-                $currentRule->getName(),
-                0,
-                null,
-                $this->depth
-            );
+            $this->trace[] = new Entry($currentRule->getName(), 0, null, $this->depth);
             $children = $currentRule->getChildren();
 
             assert(is_array($children));
@@ -329,20 +323,13 @@ class Parser
         } elseif ($currentRule instanceof ChoiceRule) {
             $children = $currentRule->getChildren();
             assert(is_array($children));
-            if ($nextRuleIndex >= count($children)) {
+            if (count($children) <= $nextRuleIndex) {
                 return false;
             }
-
-            if (false === $currentRule->isTransitional()) {
+            if (!$currentRule->isTransitional()) {
                 ++$this->depth;
             }
-
-            $this->trace[] = new Entry(
-                $currentRule->getName(),
-                $nextRuleIndex,
-                $this->todo,
-                $this->depth
-            );
+            $this->trace[] = new Entry($currentRule->getName(), $nextRuleIndex, $this->todo, $this->depth);
             $nextRule = $children[$nextRuleIndex];
             assert(is_string($nextRule) || is_int($nextRule));
             $this->todo[] = new ExitRule($nextRule, 0);
@@ -352,53 +339,33 @@ class Parser
         } elseif ($currentRule instanceof RepetitionRule) {
             $nextRule = $currentRule->getChildren();
 
-            if (0 === $nextRuleIndex) {
+            if ($nextRuleIndex === 0) {
                 $name = $currentRule->getName();
                 $min = $currentRule->getMin();
-
-                if (false === $currentRule->isTransitional()) {
+                if (!$currentRule->isTransitional()) {
                     ++$this->depth;
                 }
-
-                $this->trace[] = new Entry(
-                    $name,
-                    $min,
-                    null,
-                    $this->depth
-                );
+                $this->trace[] = new Entry($name, $min, null, $this->depth);
                 assert($this->todo !== null);
                 array_pop($this->todo);
-                $this->todo[] = new ExitRule(
-                    $name,
-                    $min,
-                    $this->todo
-                );
-
+                $this->todo[] = new ExitRule($name, $min, $this->todo);
                 for ($i = 0; $i < $min; ++$i) {
                     assert(is_string($nextRule) || is_int($nextRule));
                     $this->todo[] = new ExitRule($nextRule, 0);
                     $this->todo[] = new Entry($nextRule, 0);
                 }
-
-                return true;
             } else {
                 $max = $currentRule->getMax();
-
-                if (-1 != $max && $nextRuleIndex > $max) {
+                if ($max != -1 && $max < $nextRuleIndex) {
                     return false;
                 }
-
-                $this->todo[] = new ExitRule(
-                    $currentRule->getName(),
-                    $nextRuleIndex,
-                    $this->todo
-                );
+                $this->todo[] = new ExitRule($currentRule->getName(), $nextRuleIndex, $this->todo);
                 assert(is_string($nextRule) || is_int($nextRule));
                 $this->todo[] = new ExitRule($nextRule, 0);
                 $this->todo[] = new Entry($nextRule, 0);
 
-                return true;
             }
+            return true;
         }
 
         return false;
@@ -613,28 +580,26 @@ class Parser
      */
     protected function mergeTreeRecursive(TreeNode $node, TreeNode $newNode): void
     {
-        $nNId = $newNode->getId();
+        $newNodeId = $newNode->getId();
 
-        if ('token' === $nNId) {
+        if ($newNodeId === 'token') {
             $node->appendChild($newNode);
             $newNode->setParent($node);
-
             return;
         }
 
         $children = $node->getChildren();
         end($children);
-        $last = current($children);
+        $lastChild = current($children);
 
-        if ($last->getId() !== $nNId) {
+        if ($lastChild->getId() !== $newNodeId) {
             $node->appendChild($newNode);
             $newNode->setParent($node);
-
             return;
         }
 
         foreach ($newNode->getChildren() as $child) {
-            $this->mergeTreeRecursive($last, $child);
+            $this->mergeTreeRecursive($lastChild, $child);
         }
     }
 
