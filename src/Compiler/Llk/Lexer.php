@@ -67,24 +67,20 @@ class Lexer
 
         foreach ($this->tokens as &$tokens) {
             $_tokens = [];
-
             foreach ($tokens as $fullLexeme => $regex) {
-                if (!str_contains($fullLexeme, ':')) {
+                if (str_contains($fullLexeme, ':')) {
+                    [$lexeme, $namespace] = explode(':', $fullLexeme, 2);
+                    $stack = $stack || str_starts_with($namespace, '__shift__');
+                    unset($tokens[$fullLexeme]);
+                    $_tokens[$lexeme] = [$regex, $namespace];
+                } else {
                     $_tokens[$fullLexeme] = [$regex, null];
-                    continue;
                 }
-
-                list($lexeme, $namespace) = explode(':', $fullLexeme, 2);
-
-                $stack = $stack || str_starts_with($namespace, '__shift__');
-
-                unset($tokens[$fullLexeme]);
-                $_tokens[$lexeme] = [$regex, $namespace];
             }
             $tokens = $_tokens;
         }
 
-        if (true == $stack) {
+        if ($stack) {
             /**
              * @psalm-suppress MixedPropertyTypeCoercion
              */
@@ -93,7 +89,7 @@ class Lexer
 
         while ($offset < $maxOffset) {
             $nextToken = $this->nextToken($offset);
-            if (null === $nextToken) {
+            if ($nextToken === null) {
                 $message = sprintf(
                     'Unrecognized token "%s" at line 1 and column %d:' . "\n" .
                     '%s' . "\n" .
@@ -104,7 +100,7 @@ class Lexer
                 );
                 throw new UnrecognizedTokenException($message, 0, 1, $offset);
             }
-            if (true === $nextToken['keep']) {
+            if ($nextToken['keep'] === true) {
                 $nextToken['offset'] = $offset;
                 yield new Token($nextToken['token'], $nextToken['value'], $nextToken['length'], $nextToken['namespace'], $nextToken['keep'], $nextToken['offset']);
             }
@@ -128,9 +124,7 @@ class Lexer
          */
         $tokenArray = &$this->tokens[$this->lexerState];
 
-        foreach ($tokenArray as $lexeme => $bucket) {
-            [$regex, $nextState] = $bucket;
-
+        foreach ($tokenArray as $lexeme => [$regex, $nextState]) {
             if ($nextState === null) {
                 $nextState = $this->lexerState;
             }
@@ -166,16 +160,11 @@ class Lexer
 
                     assert(is_string($nextState));
                     if (!isset($this->tokens[$nextState])) {
-                        $message = sprintf(
-                            'Namespace %s does not exist, called by token %s in namespace %s.',
-                            $nextState,
-                            $lexeme,
-                            $this->lexerState
-                        );
+                        $message = sprintf('Namespace %s does not exist, called by token %s in namespace %s.', $nextState, $lexeme, $this->lexerState);
                         throw new LexerException($message, 2);
                     }
 
-                    if (null !== $this->namespaceStack && false === $shift) {
+                    if ($this->namespaceStack !== null && !$shift) {
                         $this->namespaceStack->push($this->lexerState);
                     }
 

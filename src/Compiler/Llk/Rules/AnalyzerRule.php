@@ -234,7 +234,7 @@ final class AnalyzerRule
         // simple() …
         $children = $this->simple($lookahead, $pNodeId);
 
-        if (null === $children) {
+        if ($children === null) {
             return null;
         }
 
