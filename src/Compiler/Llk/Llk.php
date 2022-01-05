@@ -175,7 +175,7 @@ abstract class Llk
                 ',';
         }
 
-        $out =
+        return
             'class ' . $className . ' extends \Hoa\Compiler\Llk\Parser' . "\n" .
             '{' . "\n" .
             '    public function __construct()' . "\n" .
@@ -194,8 +194,6 @@ abstract class Llk
             $outExtra . "\n" .
             '    }' . "\n" .
             '}' . "\n";
-
-        return $out;
     }
 
     /**

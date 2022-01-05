@@ -207,7 +207,7 @@ class Lexer
         $_regex = str_replace('#', '\#', $regex);
         $preg = preg_match('#\G(?|' . $_regex . ')#' . $this->pcreOptions, $this->text, $matches, 0, $offset);
 
-        if ($preg === 0) {
+        if ($preg === 0 || !isset($matches[0])) {
             return null;
         }
 

@@ -41,14 +41,14 @@ class Parser
 
     /**
      * Lexer iterator.
-     * @var Buffer<mixed,\Hoa\Compiler\Llk\Token>|Lookahead<mixed,\Hoa\Compiler\Llk\Token>|null
+     * @var Buffer<mixed,Token>|Lookahead<mixed,Token>|null
      */
     protected Buffer|Lookahead|null $tokenSequence = null;
 
     /**
      * Possible token causing an error.
      */
-    protected ?\Hoa\Compiler\Llk\Token $_errorToken = null;
+    protected ?Token $_errorToken = null;
 
     /**
      * Trace of activated rules.
@@ -451,7 +451,7 @@ class Parser
      * Walk through the trace iteratively and recursively.
      *
      * @param int $i Current trace index.
-     * @param array &$children<TreeNode> Collected children.
+     * @param array &$children<TreeNode|array{id:string?,options:array}> Collected children.
      * @return TreeNode|int
      * @psalm-suppress ArgumentTypeCoercion
      * @psalm-suppress MixedArgumentTypeCoercion
@@ -575,12 +575,12 @@ class Parser
      * Try to merge directly children into an existing node.
      *
      * @param array<TreeNode> &$children Current children being gathering.
-     * @param array<TreeNode> &$handle Children of the new node.
+     * @param array<TreeNode> $handle Children of the new node.
      * @param string $cId Node ID.
      * @param bool $recursive Whether we should merge recursively or not.
      * @return bool
      */
-    protected function mergeTree(array &$children, array &$handle, string $cId, bool $recursive): bool
+    protected function mergeTree(array &$children, array $handle, string $cId, bool $recursive): bool
     {
         end($children);
         $last = current($children);

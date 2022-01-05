@@ -120,7 +120,7 @@ final class Lookahead implements Iterator
     {
         $current = $this->getInnerIterator()->current();
         if ($current === null) {
-            throw new \RuntimeException('Invalid state');
+            throw new RuntimeException('Invalid state');
         }
         return $current;
     }
@@ -133,7 +133,7 @@ final class Lookahead implements Iterator
     {
         $key = $this->getInnerIterator()->key();
         if ($key === null) {
-            throw new \RuntimeException('Invalid state');
+            throw new RuntimeException('Invalid state');
         }
         return $key;
     }

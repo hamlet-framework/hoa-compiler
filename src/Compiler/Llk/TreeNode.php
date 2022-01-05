@@ -98,13 +98,13 @@ final class TreeNode implements Element
         return !empty($this->_value);
     }
 
-    public function prependChild(TreeNode $child): static
+    public function prependChild(TreeNode $child): TreeNode
     {
         array_unshift($this->_children, $child);
         return $this;
     }
 
-    public function appendChild(TreeNode $child): static
+    public function appendChild(TreeNode $child): TreeNode
     {
         $this->_children[] = $child;
         return $this;

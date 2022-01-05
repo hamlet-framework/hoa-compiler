@@ -5,6 +5,7 @@ namespace Hoa\Compiler\Llk\Rules;
 use Hoa\Compiler;
 use Hoa\Compiler\Exceptions\Exception;
 use Hoa\Compiler\Llk\Lexer;
+use Hoa\Compiler\Llk\Token;
 use Hoa\Iterator\Lookahead;
 
 final class AnalyzerRule
@@ -35,7 +36,7 @@ final class AnalyzerRule
 
     /**
      * Lexer iterator.
-     * @var ?Lookahead<mixed,\Hoa\Compiler\Llk\Token>
+     * @var ?Lookahead<mixed,Token>
      */
     protected ?Lookahead $lexer = null;
 
@@ -311,13 +312,7 @@ final class AnalyzerRule
         }
 
         $name = $this->_transitionalRuleCounter++;
-        $this->_parsedRules[$name] = new RepetitionRule(
-            $name,
-            $min,
-            $max,
-            $children,
-            null
-        );
+        $this->_parsedRules[$name] = new RepetitionRule($name, $min, $max, $children, null);
 
         return $name;
     }
@@ -410,13 +405,7 @@ final class AnalyzerRule
             }
 
             $name = $this->_transitionalRuleCounter++;
-            $token = new TokenRule(
-                $name,
-                $tokenName,
-                null,
-                $uId,
-                true
-            );
+            $token = new TokenRule($name, $tokenName, null, $uId, true);
             $this->_parsedRules[$name] = $token;
             $this->lexer->next();
 
@@ -437,11 +426,7 @@ final class AnalyzerRule
             if (0 === $this->lexer->key() &&
                 'EOF' === $this->lexer->getNext()->token) {
                 $name = $this->_transitionalRuleCounter++;
-                $this->_parsedRules[$name] = new ConcatenationRule(
-                    $name,
-                    [$tokenName],
-                    null
-                );
+                $this->_parsedRules[$name] = new ConcatenationRule($name, [$tokenName], null);
             } else {
                 $name = $tokenName;
             }
