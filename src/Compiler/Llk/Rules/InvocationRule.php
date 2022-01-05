@@ -12,13 +12,13 @@ abstract class InvocationRule
     /**
      * @param string|int $rule Rule.
      * @param int|string $data Data.
-     * @param ?array<InvocationRule> $todo Piece of todo sequence.
+     * @param array<InvocationRule> $todo Piece of todo sequence.
      * @param int $depth Depth in the trace.
      */
     public function __construct(
         protected string|int $rule,
         protected int|string $data,
-        protected ?array $todo = null,
+        protected array $todo = [],
         protected int $depth = -1
     ) {
         $this->transitional = is_int($rule);
@@ -42,9 +42,9 @@ abstract class InvocationRule
 
     /**
      * Get todo sequence.
-     * @return ?array<InvocationRule>
+     * @return array<InvocationRule>
      */
-    public function getTodo(): ?array
+    public function getTodo(): array
     {
         return $this->todo;
     }

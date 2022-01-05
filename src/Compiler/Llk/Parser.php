@@ -22,24 +22,6 @@ use RuntimeException;
 class Parser
 {
     /**
-     * List of pragmas.
-     * @var array<string,string|int|bool>
-     */
-    protected array $pragmas;
-
-    /**
-     * Associative array (token name => token regex), to be defined in precedence order.
-     * @var array<string,array<string,string>>
-     */
-    protected array $tokens;
-
-    /**
-     * Rules, to be defined as associative array, name(which can be numerical) => Rule object.
-     * @var array<Rule>
-     */
-    protected array $rules;
-
-    /**
      * Lexer iterator.
      * @var Buffer<mixed,Token>|Lookahead<mixed,Token>|null
      */
@@ -58,9 +40,9 @@ class Parser
 
     /**
      * Stack of todo list.
-     * @var ?array<InvocationRule>
+     * @var array<InvocationRule>
      */
-    protected ?array $todo = null;
+    protected array $todo = [];
 
     /**
      * AST.
@@ -73,20 +55,15 @@ class Parser
     protected int $depth = -1;
 
     /**
-     * Construct the parser.
-     *
-     * @param array<string,array<string,string>> $tokens Tokens.
-     * @param array<Rule> $rules Rules.
-     * @param array<string,string|int|bool> $pragmas Pragmas.
+     * @param array<string,array<string,string>> $tokens Associative array (token name => token regex), to be defined in precedence order.
+     * @param array<Rule> $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object.
+     * @param array<string,string|int|bool> $pragmas List of pragmas.
      */
     public function __construct(
-        array $tokens = [],
-        array $rules = [],
-        array $pragmas = []
+        protected array $tokens = [],
+        protected array $rules = [],
+        protected array $pragmas = []
     ) {
-        $this->tokens = $tokens;
-        $this->rules = $rules;
-        $this->pragmas = $pragmas;
     }
 
     /**
@@ -295,8 +272,6 @@ class Parser
                 $zzeRule->setRepresentation($regex);
             }
 
-            assert($this->todo !== null);
-
             array_pop($this->todo);
             $this->trace[] = $zzeRule;
             $this->tokenSequence->next();
@@ -308,7 +283,7 @@ class Parser
                 ++$this->depth;
             }
 
-            $this->trace[] = new Entry($currentRule->getName(), 0, null, $this->depth);
+            $this->trace[] = new Entry($currentRule->getName(), 0, [], $this->depth);
             $children = $currentRule->getChildren();
 
             assert(is_array($children));
@@ -345,8 +320,7 @@ class Parser
                 if (!$currentRule->isTransitional()) {
                     ++$this->depth;
                 }
-                $this->trace[] = new Entry($name, $min, null, $this->depth);
-                assert($this->todo !== null);
+                $this->trace[] = new Entry($name, $min, [], $this->depth);
                 array_pop($this->todo);
                 $this->todo[] = new ExitRule($name, $min, $this->todo);
                 for ($i = 0; $i < $min; ++$i) {

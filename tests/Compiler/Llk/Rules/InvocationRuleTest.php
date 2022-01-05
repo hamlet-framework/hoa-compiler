@@ -15,7 +15,7 @@ class InvocationTest extends TestCase
 
         $this->assertEquals($rule, $invocation->getRule());
         $this->assertEquals($data, $invocation->getData());
-        $this->assertNull($invocation->getTodo());
+        $this->assertEmpty($invocation->getTodo());
         $this->assertEquals(-1, $invocation->getDepth());
         $this->assertFalse($invocation->isTransitional());
     }
