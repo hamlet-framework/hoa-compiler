@@ -363,7 +363,6 @@ class Parser
                 assert(is_string($nextRule) || is_int($nextRule));
                 $this->todo[] = new ExitRule($nextRule, 0);
                 $this->todo[] = new Entry($nextRule, 0);
-
             }
             return true;
         }
