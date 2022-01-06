@@ -55,7 +55,7 @@ class Lexer
      * @return Generator<Token>
      * @throws UnrecognizedTokenException
      */
-    public function lexMe(string $text, array $tokens): Generator
+    public function run(string $text, array $tokens): Generator
     {
         $this->text = $text;
         $this->tokens = $tokens;
@@ -102,7 +102,7 @@ class Lexer
             }
             if ($nextToken['keep'] === true) {
                 $nextToken['offset'] = $offset;
-                yield new Token($nextToken['token'], $nextToken['value'], $nextToken['length'], $nextToken['namespace'], $nextToken['keep'], $nextToken['offset']);
+                yield Token::fromArray($nextToken);
             }
             $offset += strlen($nextToken['value']);
         }

@@ -92,6 +92,11 @@ final class TokenRule extends Rule
         return $this->ast;
     }
 
+    /**
+     * @todo does not need to return value
+     * @param string $value
+     * @return string|null
+     */
     public function setValue(string $value): ?string
     {
         $old = $this->value;
@@ -108,6 +113,7 @@ final class TokenRule extends Rule
     }
 
     /**
+     * @todo is not used, oddly enough
      * Set whether the token is kept or not in the AST.
      */
     public function setKept(bool $kept): bool

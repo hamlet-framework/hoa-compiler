@@ -91,7 +91,7 @@ abstract class Rule
     {
         $old = $this->nodeId;
 
-        if ($nodeId && false !== $pos = strpos($nodeId, ':')) {
+        if ($nodeId && ($pos = strpos($nodeId, ':')) !== false) {
             $this->nodeId = substr($nodeId, 0, $pos);
             $this->nodeOptions = str_split(substr($nodeId, $pos + 1));
         } else {
@@ -116,7 +116,7 @@ abstract class Rule
     {
         $old = $this->defaultId;
 
-        if (false !== $pos = strpos($defaultId, ':')) {
+        if (($pos = strpos($defaultId, ':')) !== false) {
             $this->defaultId = substr($defaultId, 0, $pos);
             $this->defaultOptions = str_split(substr($defaultId, $pos + 1));
         } else {

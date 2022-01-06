@@ -19,6 +19,25 @@ final class Token
         return new Token('EOF', 'EOF', 0, 'default', true, $offset);
     }
 
+    /**
+     * @param array{token:string,value:string,length:int,namespace:string,keep:bool,offset:int} $array
+     * @return Token
+     */
+    public static function fromArray(array $array): Token
+    {
+        return new Token(
+            $array['token'],
+            $array['value'],
+            $array['length'],
+            $array['namespace'],
+            $array['keep'],
+            $array['offset']
+        );
+    }
+
+    /**
+     * @return array{token:string,value:string,length:int,namespace:string,keep:bool,offset:int}
+     */
     public function toArray(): array
     {
         return [

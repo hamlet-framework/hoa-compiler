@@ -29,7 +29,7 @@ class LexerTest extends TestCase
             ]
         ];
 
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->assertInstanceOf(Generator::class, $result);
     }
@@ -46,7 +46,7 @@ class LexerTest extends TestCase
             ]
         ];
 
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $current = $result->current();
         $this->assertEquals([
@@ -106,7 +106,7 @@ class LexerTest extends TestCase
                 'def'  => 'def',
             ]
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->assertEquals([
             'token'     => 'abc',
@@ -135,7 +135,7 @@ class LexerTest extends TestCase
             'one'     => ['def:two'     => 'def'],
             'two'     => ['ghi:default' => 'ghi']
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->assertEquals([
             [
@@ -190,7 +190,7 @@ class LexerTest extends TestCase
             'one'     => ['def:two'           => 'def'],
             'two'     => ['ghi:__shift__ * 2' => 'ghi'],
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->assertEquals([
             [
@@ -243,7 +243,7 @@ class LexerTest extends TestCase
         $tokens = [
             'default' => ['abc:__shift__' => 'abc'],
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->expectException(LexerException::class);
         $this->expectExceptionMessage(
@@ -264,7 +264,7 @@ class LexerTest extends TestCase
                 'def'     => 'def',
             ]
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->expectException(LexerException::class);
         $this->expectExceptionMessage(
@@ -286,7 +286,7 @@ class LexerTest extends TestCase
                 'ghi'  => 'ghi',
             ]
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->assertEquals([
             [
@@ -342,7 +342,7 @@ class LexerTest extends TestCase
                 'def' => 'def',
             ]
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->expectException(LexerException::class);
         $this->expectExceptionMessage(
@@ -362,7 +362,7 @@ class LexerTest extends TestCase
                 'bar' => '\w',
             ]
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->assertEquals([
             [
@@ -402,7 +402,7 @@ class LexerTest extends TestCase
                 'bar' => '\w',
             ]
         ];
-        $result = $lexer->lexMe($datum, $tokens);
+        $result = $lexer->run($datum, $tokens);
 
         $this->expectException(UnrecognizedTokenException::class);
         $this->expectExceptionMessage(

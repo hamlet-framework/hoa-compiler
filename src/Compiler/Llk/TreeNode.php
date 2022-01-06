@@ -17,12 +17,6 @@ final class TreeNode implements Element
     protected ?array $_value = null;
 
     /**
-     * Children.
-     * @var array<TreeNode>
-     */
-    protected array $_children;
-
-    /**
      * Parent.
      */
     protected ?TreeNode $_parent = null;
@@ -38,12 +32,11 @@ final class TreeNode implements Element
      * @param array<TreeNode> $children
      * @param ?TreeNode $parent
      */
-    public function __construct(private string $id, ?array $value = null, array $children = [], ?TreeNode $parent = null)
+    public function __construct(private string $id, ?array $value = null, private array $children = [], ?TreeNode $parent = null)
     {
         if (!empty($value)) {
             $this->_value = $value;
         }
-        $this->_children = $children;
         if (null !== $parent) {
             $this->_parent = $parent;
         }
@@ -100,13 +93,13 @@ final class TreeNode implements Element
 
     public function prependChild(TreeNode $child): TreeNode
     {
-        array_unshift($this->_children, $child);
+        array_unshift($this->children, $child);
         return $this;
     }
 
     public function appendChild(TreeNode $child): TreeNode
     {
-        $this->_children[] = $child;
+        $this->children[] = $child;
         return $this;
     }
 
@@ -116,14 +109,14 @@ final class TreeNode implements Element
      */
     public function setChildren(array $children): array
     {
-        $old = $this->_children;
-        $this->_children = $children;
+        $old = $this->children;
+        $this->children = $children;
         return $old;
     }
 
     public function getChild(int $i): ?TreeNode
     {
-        return $this->childExists($i) ? $this->_children[$i] : null;
+        return $this->childExists($i) ? $this->children[$i] : null;
     }
 
     /**
@@ -131,17 +124,17 @@ final class TreeNode implements Element
      */
     public function getChildren(): array
     {
-        return $this->_children;
+        return $this->children;
     }
 
     public function getChildrenNumber(): int
     {
-        return count($this->_children);
+        return count($this->children);
     }
 
     public function childExists(int $i): bool
     {
-        return array_key_exists($i, $this->_children);
+        return array_key_exists($i, $this->children);
     }
 
     public function setParent(TreeNode $parent): ?TreeNode

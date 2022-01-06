@@ -51,6 +51,7 @@ abstract class InvocationRule
 
     /**
      * Set depth in trace.
+     * @todo doesn't actually need to return anything
      */
     public function setDepth(int $depth): int
     {

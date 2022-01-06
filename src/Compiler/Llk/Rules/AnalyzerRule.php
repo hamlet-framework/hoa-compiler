@@ -84,7 +84,7 @@ final class AnalyzerRule
         $lexer = new Lexer();
 
         foreach ($rules as $key => $value) {
-            $lookahead = new Lookahead($lexer->lexMe($value, AnalyzerRule::$_ppLexemes));
+            $lookahead = new Lookahead($lexer->run($value, AnalyzerRule::$_ppLexemes));
             $lookahead->rewind();
 
             $this->ruleName = $key;
@@ -377,14 +377,12 @@ final class AnalyzerRule
 
         if ($lookahead->current()->token === 'named') {
             $tokenName = rtrim($lookahead->current()->value, '()');
-            if (false === array_key_exists($tokenName, $this->rules) &&
-                false === array_key_exists('#' . $tokenName, $this->rules)) {
+            if (!array_key_exists($tokenName, $this->rules) && !array_key_exists('#' . $tokenName, $this->rules)) {
                 $message = sprintf('Cannot call rule %s() in rule %s because it does not exist.', $tokenName, $this->ruleName ?? 'unknown');
                 throw new Compiler\Exceptions\RuleException($message, 5);
             }
 
-            if (0 === $lookahead->key() &&
-                'EOF' === $lookahead->getNext()->token) {
+            if ($lookahead->key() === 0 && $lookahead->getNext()->token === 'EOF') {
                 $name = $this->transitionalRuleCounter++;
                 $this->parsedRules[$name] = new ConcatenationRule($name, [$tokenName], null);
             } else {
