@@ -2,6 +2,6 @@
 
 namespace Hoa\Compiler\Llk\Rules;
 
-class Entry extends InvocationRule
+class EntryRule extends InvocationRule
 {
 }

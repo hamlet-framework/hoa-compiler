@@ -41,7 +41,7 @@ final class AnalyzerRule
     protected array $rules = [];
 
     /**
-     * RuleException name being analyzed.
+     * Rule name being analyzed.
      */
     private string|int|null $ruleName = null;
 
@@ -49,7 +49,7 @@ final class AnalyzerRule
      * Parsed rules.
      * @var array<Rule>
      */
-    protected ?array $parsedRules = null;
+    protected array $parsedRules = [];
 
     /**
      * Counter to auto-name transitional rules.
@@ -98,7 +98,7 @@ final class AnalyzerRule
             $pNodeId = $nodeId;
             $rule = $this->rule($lookahead, $pNodeId);
 
-            if (null === $rule) {
+            if ($rule === null) {
                 $message = sprintf('Error while parsing rule %s.', $key);
                 throw new Exception($message, 1);
             }
@@ -109,7 +109,7 @@ final class AnalyzerRule
             $zeRule->setName($key);
             $zeRule->setPPRepresentation($value);
 
-            if (null !== $nodeId) {
+            if ($nodeId !== null) {
                 $zeRule->setDefaultId($nodeId);
             }
 
@@ -134,8 +134,6 @@ final class AnalyzerRule
     /**
      * @param Lookahead<mixed,Token> $lookahead
      * Implementation of “choice”.
-     * @psalm-suppress PossiblyNullReference
-     * @psalm-suppress PossiblyNullArrayAccess
      */
     private function choice(Lookahead $lookahead, ?string &$pNodeId): string|int|null
     {

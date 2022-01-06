@@ -9,6 +9,7 @@ use SplDoublyLinkedList;
  * @template I
  * @template T
  * @implements Iterator<I,T>
+ * @todo rewtite this code as this is rather shit
  */
 final class Buffer implements Iterator
 {

@@ -6,7 +6,7 @@ use Hoa\Compiler;
 use Hoa\Compiler\Exceptions\UnexpectedTokenException;
 use Hoa\Compiler\Llk\Rules\ChoiceRule;
 use Hoa\Compiler\Llk\Rules\ConcatenationRule;
-use Hoa\Compiler\Llk\Rules\Entry;
+use Hoa\Compiler\Llk\Rules\EntryRule;
 use Hoa\Compiler\Llk\Rules\ExitRule;
 use Hoa\Compiler\Llk\Rules\InvocationRule;
 use Hoa\Compiler\Llk\Rules\RepetitionRule;
@@ -40,7 +40,7 @@ final class Parser
     /**
      * AST.
      */
-    private ?TreeNode $_tree = null;
+    private ?TreeNode $tree = null;
 
     /**
      * Current depth while building the trace.
@@ -63,12 +63,12 @@ final class Parser
      * Parse :-).
      *
      * @param string $text Text to parse.
-     * @param string|null $rule The axiom, i.e. root rule.
+     * @param string|null $axiomRule The axiom, i.e. root rule.
      * @param bool $asTree Whether build tree or not.
      * @return TreeNode
      * @throws UnexpectedTokenException
      */
-    public function parse(string $text, string $rule = null, bool $asTree = true): TreeNode
+    public function parse(string $text, string $axiomRule = null, bool $asTree = true): TreeNode
     {
         $bufferSize = 1024;
         if (isset($this->pragmas['parser.lookahead'])) {
@@ -80,14 +80,13 @@ final class Parser
 
         $this->_errorToken = null;
         $this->trace = [];
-        $this->todo = [];
 
-        if ($rule === null || !array_key_exists($rule, $this->rules)) {
-            $rule = $this->getRootRule();
+        if ($axiomRule === null || !array_key_exists($axiomRule, $this->rules)) {
+            $axiomRule = $this->getRootRule();
         }
 
-        $closeRule = new ExitRule($rule, 0);
-        $openRule = new Entry($rule, 0, [$closeRule]);
+        $closeRule = new ExitRule($axiomRule, 0);
+        $openRule = new EntryRule($axiomRule, 0, [$closeRule]);
         $this->todo = [$closeRule, $openRule];
 
         do {
@@ -148,11 +147,11 @@ final class Parser
             throw new RuntimeException('Should never happen.');
         }
 
-        $tree = $this->_buildTree();
+        $tree = $this->buildTree();
         if (!($tree instanceof TreeNode)) {
             throw new Compiler\Exceptions\Exception('Parsing error: cannot build AST, the trace is corrupted.', 1);
         }
-        return $this->_tree = $tree;
+        return $this->tree = $tree;
     }
 
     /**
@@ -206,7 +205,7 @@ final class Parser
                 for ($skip = 0, $i = count($this->trace) - 1; $i >= 0; --$i) {
                     $trace = $this->trace[$i];
 
-                    if ($trace instanceof Entry) {
+                    if ($trace instanceof EntryRule) {
                         if (false === $trace->isTransitional()) {
                             if ($trace->getDepth() <= $this->depth) {
                                 break;
@@ -264,7 +263,7 @@ final class Parser
                 ++$this->depth;
             }
 
-            $this->trace[] = new Entry($currentRule->getName(), 0, [], $this->depth);
+            $this->trace[] = new EntryRule($currentRule->getName(), 0, [], $this->depth);
             $children = $currentRule->getChildren();
 
             assert(is_array($children));
@@ -272,7 +271,7 @@ final class Parser
                 $nextRule = $children[$i];
                 assert(is_string($nextRule) || is_int($nextRule));
                 $this->todo[] = new ExitRule($nextRule, 0);
-                $this->todo[] = new Entry($nextRule, 0);
+                $this->todo[] = new EntryRule($nextRule, 0);
             }
 
             return true;
@@ -285,11 +284,11 @@ final class Parser
             if (!$currentRule->isTransitional()) {
                 ++$this->depth;
             }
-            $this->trace[] = new Entry($currentRule->getName(), $nextRuleIndex, $this->todo, $this->depth);
+            $this->trace[] = new EntryRule($currentRule->getName(), $nextRuleIndex, $this->todo, $this->depth);
             $nextRule = $children[$nextRuleIndex];
             assert(is_string($nextRule) || is_int($nextRule));
             $this->todo[] = new ExitRule($nextRule, 0);
-            $this->todo[] = new Entry($nextRule, 0);
+            $this->todo[] = new EntryRule($nextRule, 0);
 
             return true;
         } elseif ($currentRule instanceof RepetitionRule) {
@@ -301,13 +300,13 @@ final class Parser
                 if (!$currentRule->isTransitional()) {
                     ++$this->depth;
                 }
-                $this->trace[] = new Entry($name, $min, [], $this->depth);
+                $this->trace[] = new EntryRule($name, $min, [], $this->depth);
                 array_pop($this->todo);
                 $this->todo[] = new ExitRule($name, $min, $this->todo);
                 for ($i = 0; $i < $min; ++$i) {
                     assert(is_string($nextRule) || is_int($nextRule));
                     $this->todo[] = new ExitRule($nextRule, 0);
-                    $this->todo[] = new Entry($nextRule, 0);
+                    $this->todo[] = new EntryRule($nextRule, 0);
                 }
             } else {
                 $max = $currentRule->getMax();
@@ -317,7 +316,7 @@ final class Parser
                 $this->todo[] = new ExitRule($currentRule->getName(), $nextRuleIndex, $this->todo);
                 assert(is_string($nextRule) || is_int($nextRule));
                 $this->todo[] = new ExitRule($nextRule, 0);
-                $this->todo[] = new Entry($nextRule, 0);
+                $this->todo[] = new EntryRule($nextRule, 0);
             }
             return true;
         }
@@ -336,7 +335,7 @@ final class Parser
 
         do {
             $last = array_pop($this->trace);
-            if ($last instanceof Entry) {
+            if ($last instanceof EntryRule) {
                 $zeRule = $this->rules[$last->getRule()];
                 $found = $zeRule instanceof ChoiceRule;
             } elseif ($last instanceof ExitRule) {
@@ -359,7 +358,7 @@ final class Parser
         $next = ((int) $last->getData()) + 1;
         $this->depth = $last->getDepth();
         $this->todo = $last->getTodo();
-        $this->todo[] = new Entry($rule, $next);
+        $this->todo[] = new EntryRule($rule, $next);
 
         return true;
     }
@@ -376,7 +375,7 @@ final class Parser
      * @psalm-suppress MixedArgument
      * @psalm-suppress MixedAssignment
      */
-    private function _buildTree(int $i = 0, array &$children = []): TreeNode|int
+    private function buildTree(int $i = 0, array &$children = []): TreeNode|int
     {
         $max = count($this->trace);
 
@@ -384,7 +383,7 @@ final class Parser
             assert(is_int($i));
             $trace = $this->trace[$i];
 
-            if ($trace instanceof Entry) {
+            if ($trace instanceof EntryRule) {
                 $ruleName = $trace->getRule();
                 $rule = $this->rules[$ruleName];
                 $isRule = !$trace->isTransitional();
@@ -408,7 +407,7 @@ final class Parser
                     ];
                 }
 
-                $i = $this->_buildTree($i + 1, $children);
+                $i = $this->buildTree($i + 1, $children);
 
                 if (!$isRule) {
                     continue;
@@ -552,10 +551,12 @@ final class Parser
 
     /**
      * Get AST.
+     * @todo not sure this method is needed because the parse method returns all we need
+     * @deprecated
      */
     public function getTree(): ?TreeNode
     {
-        return $this->_tree;
+        return $this->tree;
     }
 
     /**
