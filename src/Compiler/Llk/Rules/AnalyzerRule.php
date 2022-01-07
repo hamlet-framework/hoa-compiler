@@ -103,8 +103,6 @@ final class AnalyzerRule
                 throw new Exception($message, 1);
             }
 
-            assert(!empty($this->parsedRules));
-
             $zeRule = $this->parsedRules[$rule];
             $zeRule->setName($key);
             $zeRule->setPPRepresentation($value);

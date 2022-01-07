@@ -51,11 +51,9 @@ final class TokenRule extends Rule
         return $this->tokenName;
     }
 
-    public function setNamespace(string $namespace): ?string
+    public function setNamespace(string $namespace): void
     {
-        $old = $this->namespace;
         $this->namespace = $namespace;
-        return $old;
     }
 
     public function getNamespace(): ?string
@@ -63,11 +61,9 @@ final class TokenRule extends Rule
         return $this->namespace;
     }
 
-    public function setRepresentation(string $regex): ?string
+    public function setRepresentation(string $regex): void
     {
-        $old = $this->regex;
         $this->regex = $regex;
-        return $old;
     }
 
     public function getRepresentation(): string
@@ -92,35 +88,14 @@ final class TokenRule extends Rule
         return $this->ast;
     }
 
-    /**
-     * @todo does not need to return value
-     * @param string $value
-     * @return string|null
-     */
-    public function setValue(string $value): ?string
+    public function setValue(string $value): void
     {
-        $old = $this->value;
         $this->value = $value;
-        return $old;
     }
 
-    /**
-     * Get token value.
-     */
     public function getValue(): ?string
     {
         return $this->value;
-    }
-
-    /**
-     * @todo is not used, oddly enough
-     * Set whether the token is kept or not in the AST.
-     */
-    public function setKept(bool $kept): bool
-    {
-        $old = $this->kept;
-        $this->kept = $kept;
-        return $old;
     }
 
     /**

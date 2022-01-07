@@ -50,12 +50,8 @@ class TokenTest extends TestCase
         $namespace = 'qux';
         $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
-        $this->assertNull($token->setNamespace($namespace));
+        $token->setNamespace($namespace);
         $this->assertEquals($namespace, $token->getNamespace());
-
-        $namespace2 = 'soop';
-        $this->assertEquals($namespace, $token->setNamespace($namespace2));
-        $this->assertEquals($namespace2, $token->getNamespace());
     }
 
     public function test_set_and_get_representation(): void
@@ -67,7 +63,7 @@ class TokenTest extends TestCase
         $representation = 'qux';
         $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
-        $this->assertNull($token->setRepresentation($representation));
+        $token->setRepresentation($representation);
         $this->assertEquals($representation, $token->getRepresentation());
     }
 
@@ -115,8 +111,6 @@ class TokenTest extends TestCase
         $token = new TokenRule($name, $tokenName, $nodeId, $unification);
 
         $this->assertFalse($token->isKept());
-        $this->assertFalse($token->setKept(true));
-        $this->assertTrue($token->isKept());
     }
 
     public function test_get_unification_index(): void

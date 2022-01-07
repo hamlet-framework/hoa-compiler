@@ -76,14 +76,11 @@ class TreeNodeTest extends TestCase
         $this->assertEquals('bar', $node->getId());
     }
 
-    public function test_set_and_get_value(): void
+    public function test_get_value(): void
     {
         $node = new TreeNode('foo', ['bar']);
 
-        $result = $node->setValue(['baz']);
-
-        $this->assertEquals(['bar'], $result);
-        $this->assertEquals(['baz'], $node->getValue());
+        $this->assertEquals(['bar'], $node->getValue());
     }
 
     public function test_get_value_token(): void

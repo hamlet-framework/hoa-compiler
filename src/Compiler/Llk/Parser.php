@@ -391,7 +391,7 @@ final class Parser
                 $id = $rule->getNodeId();
 
                 // Optimization: Skip empty trace sequence.
-                if ($nextTrace instanceof ExitRule && $ruleName == $nextTrace->getRule()) {
+                if ($nextTrace instanceof ExitRule && $nextTrace->getRule() == $ruleName) {
                     $i += 2;
                     continue;
                 }
@@ -400,7 +400,7 @@ final class Parser
                     $children[] = $ruleName;
                 }
 
-                if (null !== $id) {
+                if ($id !== null) {
                     $children[] = [
                         'id' => $id,
                         'options' => $rule->getNodeOptions()
@@ -430,16 +430,15 @@ final class Parser
                     }
                 } while (null !== $pop);
 
-                if (null === $cId) {
+                if ($cId === null) {
                     $cId = $rule->getDefaultId();
                     $cOptions = $rule->getDefaultOptions();
                 }
 
-                if (null === $cId) {
+                if ($cId === null) {
                     for ($j = count($handle) - 1; $j >= 0; --$j) {
                         $children[] = $handle[$j];
                     }
-
                     continue;
                 }
 
@@ -500,7 +499,7 @@ final class Parser
         if (!is_object($last)) {
             return false;
         }
-        if ($cId !== $last->getId()) {
+        if ($last->getId() !== $cId) {
             return false;
         }
         if ($recursive) {

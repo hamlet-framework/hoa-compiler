@@ -59,7 +59,8 @@ class InvocationTest extends TestCase
         $invocation = new class($rule, $data) extends InvocationRule {
         };
 
-        $this->assertEquals(-1, $invocation->setDepth($depth));
+        $this->assertEquals(-1, $invocation->getDepth());
+        $invocation->setDepth($depth);
         $this->assertEquals($depth, $invocation->getDepth());
     }
 

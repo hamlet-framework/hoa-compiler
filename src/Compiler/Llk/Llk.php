@@ -216,36 +216,29 @@ abstract class Llk
             }
 
             if (str_starts_with($line, '%')) {
-                if (0 !== preg_match('#^%pragma\h+([^\h]+)\h+(.*)$#u', $line, $matches)) {
+                if (preg_match('#^%pragma\h+([^\h]+)\h+(.*)$#u', $line, $matches) !== 0) {
                     switch ($matches[2]) {
                         case 'true':
                             $pragmaValue = true;
-
                             break;
-
                         case 'false':
                             $pragmaValue = false;
-
                             break;
-
                         default:
-                            if (true === ctype_digit($matches[2])) {
+                            if (ctype_digit($matches[2])) {
                                 $pragmaValue = intval($matches[2]);
                             } else {
                                 $pragmaValue = $matches[2];
                             }
                     }
-
                     $pragmas[$matches[1]] = $pragmaValue;
                 } elseif (0 !== preg_match('#^%skip\h+(?:([^:]+):)?([^\h]+)\h+(.*)$#u', $line, $matches)) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }
-
                     if (!isset($tokens[$matches[1]])) {
                         $tokens[$matches[1]] = [];
                     }
-
                     if (!isset($tokens[$matches[1]]['skip'])) {
                         $tokens[$matches[1]]['skip'] = $matches[3];
                     } else {

@@ -14,17 +14,17 @@ final class TreeNode implements Element
      * Value of the node (non-null for token nodes).
      * @var ?array<string,?string>
      */
-    protected ?array $_value = null;
+    protected ?array $value = null;
 
     /**
      * Parent.
      */
-    protected ?TreeNode $_parent = null;
+    protected ?TreeNode $parent = null;
 
     /**
      * Attached data.
      */
-    protected array $_data = [];
+    protected array $data = [];
 
     /**
      * @param string $id Should be something like #ruleName or token
@@ -35,10 +35,10 @@ final class TreeNode implements Element
     public function __construct(private string $id, ?array $value = null, private array $children = [], ?TreeNode $parent = null)
     {
         if (!empty($value)) {
-            $this->_value = $value;
+            $this->value = $value;
         }
         if (null !== $parent) {
-            $this->_parent = $parent;
+            $this->parent = $parent;
         }
     }
 
@@ -55,32 +55,21 @@ final class TreeNode implements Element
     }
 
     /**
-     * @param array<string,?string> $value
-     * @return ?array<string,?string>
-     */
-    public function setValue(array $value): ?array
-    {
-        $old = $this->_value;
-        $this->_value = $value;
-        return $old;
-    }
-
-    /**
      * @return ?array<string,?string>
      */
     public function getValue(): ?array
     {
-        return $this->_value;
+        return $this->value;
     }
 
     public function getValueToken(): ?string
     {
-        return $this->_value['token'] ?? null;
+        return $this->value['token'] ?? null;
     }
 
     public function getValueValue(): ?string
     {
-        return $this->_value['value'] ?? null;
+        return $this->value['value'] ?? null;
     }
 
     /**
@@ -88,7 +77,7 @@ final class TreeNode implements Element
      */
     public function isToken(): bool
     {
-        return !empty($this->_value);
+        return !empty($this->value);
     }
 
     public function prependChild(TreeNode $child): TreeNode
@@ -137,21 +126,19 @@ final class TreeNode implements Element
         return array_key_exists($i, $this->children);
     }
 
-    public function setParent(TreeNode $parent): ?TreeNode
+    public function setParent(TreeNode $parent): void
     {
-        $old = $this->_parent;
-        $this->_parent = $parent;
-        return $old;
+        $this->parent = $parent;
     }
 
     public function getParent(): ?TreeNode
     {
-        return $this->_parent;
+        return $this->parent;
     }
 
     public function &getData(): array
     {
-        return $this->_data;
+        return $this->data;
     }
 
     /**
@@ -168,6 +155,6 @@ final class TreeNode implements Element
      */
     public function __destruct()
     {
-        unset($this->_parent);
+        unset($this->parent);
     }
 }
