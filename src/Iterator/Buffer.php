@@ -36,14 +36,6 @@ final class Buffer implements Iterator
     }
 
     /**
-     * Get buffer size.
-     */
-    public function getBufferSize(): int
-    {
-        return $this->bufferSize;
-    }
-
-    /**
      * Return the current element.
      * @return T
      */
@@ -66,23 +58,20 @@ final class Buffer implements Iterator
      */
     public function next(): void
     {
-        $buffer = $this->buffer;
-
-        $buffer->next();
+        $this->buffer->next();
 
         // End of the buffer, need a new value.
-        if (!$buffer->valid()) {
-            $maximumBufferSize = $this->getBufferSize();
-            for ($bufferSize = count($buffer); $bufferSize >= $maximumBufferSize; --$bufferSize) {
-                $buffer->shift();
+        if (!$this->buffer->valid()) {
+            for ($i = count($this->buffer); $this->bufferSize <= $i; $i--) {
+                $this->buffer->shift();
             }
             $this->iterator->next();
-            $buffer->push([$this->iterator->key(), $this->iterator->current()]);
+            $this->buffer->push([$this->iterator->key(), $this->iterator->current()]);
 
             // Seek to the end of the buffer.
-            $buffer->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO | SplDoublyLinkedList::IT_MODE_KEEP);
-            $buffer->rewind();
-            $buffer->setIteratorMode(SplDoublyLinkedList::IT_MODE_FIFO | SplDoublyLinkedList::IT_MODE_KEEP);
+            $this->buffer->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO | SplDoublyLinkedList::IT_MODE_KEEP);
+            $this->buffer->rewind();
+            $this->buffer->setIteratorMode(SplDoublyLinkedList::IT_MODE_FIFO | SplDoublyLinkedList::IT_MODE_KEEP);
         }
     }
 
@@ -99,12 +88,11 @@ final class Buffer implements Iterator
      */
     public function rewind(): void
     {
-        $buffer = $this->buffer;
         $this->iterator->rewind();
-        if ($buffer->isEmpty()) {
-            $buffer->push([$this->iterator->key(), $this->iterator->current()]);
+        if ($this->buffer->isEmpty()) {
+            $this->buffer->push([$this->iterator->key(), $this->iterator->current()]);
         }
-        $buffer->rewind();
+        $this->buffer->rewind();
     }
 
     /**

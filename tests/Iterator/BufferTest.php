@@ -7,22 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class BufferTest extends TestCase
 {
-    public function test_negative_buffer_size(): void
-    {
-        $innerIterator = new ArrayIterator(['a', 'b', 'c', 'd', 'e']);
-        $buffer = new Buffer($innerIterator, -21);
-
-        $this->assertEquals(1, $buffer->getBufferSize());
-    }
-
-    public function test_zero_buffer_size(): void
-    {
-        $innerIterator = new ArrayIterator(['a', 'b', 'c', 'd', 'e']);
-        $buffer = new Buffer($innerIterator, 0);
-
-        $this->assertEquals(1, $buffer->getBufferSize());
-    }
-
     public function test_fast_forward(): void
     {
         $array = ['a', 'b', 'c', 'd', 'e'];
