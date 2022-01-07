@@ -14,18 +14,6 @@ use SplDoublyLinkedList;
 final class Buffer implements Iterator
 {
     /**
-     * Buffer key index.
-     * @const int
-     */
-    private const BUFFER_KEY = 0;
-
-    /**
-     * Buffer value index.
-     * @const int
-     */
-    private const BUFFER_VALUE = 1;
-
-    /**
      * Buffer.
      * @var SplDoublyLinkedList<int,array{I,T}>
      */
@@ -48,23 +36,6 @@ final class Buffer implements Iterator
     }
 
     /**
-     * Get inner iterator.
-     */
-    public function getInnerIterator(): Iterator
-    {
-        return $this->iterator;
-    }
-
-    /**
-     * Get buffer.
-     * @return SplDoublyLinkedList<int,array{I,T}>
-     */
-    protected function getBuffer(): SplDoublyLinkedList
-    {
-        return $this->buffer;
-    }
-
-    /**
      * Get buffer size.
      */
     public function getBufferSize(): int
@@ -78,7 +49,7 @@ final class Buffer implements Iterator
      */
     public function current(): mixed
     {
-        return $this->getBuffer()->current()[self::BUFFER_VALUE];
+        return $this->buffer->current()[1];
     }
 
     /**
@@ -87,7 +58,7 @@ final class Buffer implements Iterator
      */
     public function key(): mixed
     {
-        return $this->getBuffer()->current()[self::BUFFER_KEY];
+        return $this->buffer->current()[0];
     }
 
     /**
@@ -95,22 +66,18 @@ final class Buffer implements Iterator
      */
     public function next(): void
     {
-        $innerIterator = $this->getInnerIterator();
-        $buffer = $this->getBuffer();
+        $buffer = $this->buffer;
 
         $buffer->next();
 
         // End of the buffer, need a new value.
-        if (false === $buffer->valid()) {
+        if (!$buffer->valid()) {
             $maximumBufferSize = $this->getBufferSize();
             for ($bufferSize = count($buffer); $bufferSize >= $maximumBufferSize; --$bufferSize) {
                 $buffer->shift();
             }
-            $innerIterator->next();
-            $buffer->push([
-                self::BUFFER_KEY => $innerIterator->key(),
-                self::BUFFER_VALUE => $innerIterator->current()
-            ]);
+            $this->iterator->next();
+            $buffer->push([$this->iterator->key(), $this->iterator->current()]);
 
             // Seek to the end of the buffer.
             $buffer->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO | SplDoublyLinkedList::IT_MODE_KEEP);
@@ -124,7 +91,7 @@ final class Buffer implements Iterator
      */
     public function previous(): void
     {
-        $this->getBuffer()->prev();
+        $this->buffer->prev();
     }
 
     /**
@@ -132,14 +99,10 @@ final class Buffer implements Iterator
      */
     public function rewind(): void
     {
-        $innerIterator = $this->getInnerIterator();
-        $buffer = $this->getBuffer();
-        $innerIterator->rewind();
+        $buffer = $this->buffer;
+        $this->iterator->rewind();
         if ($buffer->isEmpty()) {
-            $buffer->push([
-                self::BUFFER_KEY => $innerIterator->key(),
-                self::BUFFER_VALUE => $innerIterator->current()
-            ]);
+            $buffer->push([$this->iterator->key(), $this->iterator->current()]);
         }
         $buffer->rewind();
     }
@@ -149,6 +112,6 @@ final class Buffer implements Iterator
      */
     public function valid(): bool
     {
-        return $this->getBuffer()->valid() && $this->getInnerIterator()->valid();
+        return $this->buffer->valid() && $this->iterator->valid();
     }
 }

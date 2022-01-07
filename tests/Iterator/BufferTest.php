@@ -7,15 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class BufferTest extends TestCase
 {
-    public function test_initialization(): void
-    {
-        $innerIterator = new ArrayIterator(['a', 'b', 'c', 'd', 'e']);
-        $buffer = new Buffer($innerIterator, 3);
-
-        $this->assertSame($innerIterator, $buffer->getInnerIterator());
-        $this->assertEquals(3, $buffer->getBufferSize());
-    }
-
     public function test_negative_buffer_size(): void
     {
         $innerIterator = new ArrayIterator(['a', 'b', 'c', 'd', 'e']);

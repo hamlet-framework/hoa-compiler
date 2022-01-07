@@ -37,15 +37,6 @@ final class Lookahead implements Iterator
     }
 
     /**
-     * Get inner iterator.
-     * @return Iterator<I,T>
-     */
-    public function getInnerIterator(): Iterator
-    {
-        return $this->iterator;
-    }
-
-    /**
      * Return the current element.
      * @return T
      */
@@ -74,17 +65,16 @@ final class Lookahead implements Iterator
      */
     public function next(): void
     {
-        $innerIterator = $this->getInnerIterator();
-        $this->valid = $innerIterator->valid();
+        $this->valid = $this->iterator->valid();
 
-        if (false === $this->valid) {
+        if (!$this->valid) {
             return;
         }
 
-        $this->key = $innerIterator->key();
-        $this->current = $innerIterator->current();
+        $this->key = $this->iterator->key();
+        $this->current = $this->iterator->current();
 
-        $innerIterator->next();
+        $this->iterator->next();
     }
 
     /**
@@ -92,7 +82,7 @@ final class Lookahead implements Iterator
      */
     public function rewind(): void
     {
-        $this->getInnerIterator()->rewind();
+        $this->iterator->rewind();
         $this->next();
     }
 
@@ -109,7 +99,7 @@ final class Lookahead implements Iterator
      */
     public function hasNext(): bool
     {
-        return $this->getInnerIterator()->valid();
+        return $this->iterator->valid();
     }
 
     /**
@@ -118,7 +108,7 @@ final class Lookahead implements Iterator
      */
     public function getNext(): mixed
     {
-        $current = $this->getInnerIterator()->current();
+        $current = $this->iterator->current();
         if ($current === null) {
             throw new RuntimeException('Invalid state');
         }
@@ -131,7 +121,7 @@ final class Lookahead implements Iterator
      */
     public function getNextKey(): mixed
     {
-        $key = $this->getInnerIterator()->key();
+        $key = $this->iterator->key();
         if ($key === null) {
             throw new RuntimeException('Invalid state');
         }
