@@ -37,8 +37,10 @@ class RuleTest extends TestCase
         $children = ['bar'];
         $rule = new class($name, $children) extends Rule {};
 
+        $this->assertEquals($name, $rule->getName());
+
         $name2 = 'baz';
-        $this->assertEquals($name, $rule->setName($name2));
+        $rule->setName($name2);
         $this->assertEquals($name2, $rule->getName());
     }
 
@@ -46,17 +48,9 @@ class RuleTest extends TestCase
     {
         $name = 'foo';
         $children = ['bar'];
-        $rule = new class($name, $children) extends Rule
-        {
-            public function setChildren(mixed $children): mixed
-            {
-                return parent::setChildren($children);
-            }
-        };
+        $rule = new class($name, $children) extends Rule {};
 
-        $children2 = ['baz'];
-        $this->assertEquals($children, $rule->setChildren($children2));
-        $this->assertEquals($children2, $rule->getChildren());
+        $this->assertEquals($children, $rule->getChildren());
     }
 
     public function test_set_and_get_node_id(): void
@@ -66,8 +60,10 @@ class RuleTest extends TestCase
         $nodeId = 'id';
         $rule = new class($name, $children, $nodeId) extends Rule {};
 
+        $this->assertEquals($nodeId, $rule->getNodeId());
+
         $nodeId2 = 'baz';
-        $this->assertEquals($nodeId, $rule->setNodeId($nodeId2));
+        $rule->setNodeId($nodeId2);
         $this->assertEquals($nodeId2, $rule->getNodeId());
     }
 

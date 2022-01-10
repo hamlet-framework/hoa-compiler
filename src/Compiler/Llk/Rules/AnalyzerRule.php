@@ -319,7 +319,7 @@ final class AnalyzerRule
      * Implementation of “simple”.
      * @param Lookahead<mixed,Token> $lookahead
      * @param string|null $pNodeId
-     * @return string|int|null
+     * @return int|string|null
      */
     private function simple(Lookahead $lookahead, ?string &$pNodeId): string|int|null
     {

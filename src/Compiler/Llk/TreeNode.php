@@ -42,13 +42,6 @@ final class TreeNode implements Element
         }
     }
 
-    public function setId(string $id): string
-    {
-        $old = $this->id;
-        $this->id = $id;
-        return $old;
-    }
-
     public function getId(): string
     {
         return $this->id;
@@ -90,17 +83,6 @@ final class TreeNode implements Element
     {
         $this->children[] = $child;
         return $this;
-    }
-
-    /**
-     * @param array<TreeNode> $children
-     * @return array<TreeNode>
-     */
-    public function setChildren(array $children): array
-    {
-        $old = $this->children;
-        $this->children = $children;
-        return $old;
     }
 
     public function getChild(int $i): ?TreeNode

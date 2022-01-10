@@ -21,7 +21,7 @@ class TreeNodeTest extends TestCase
     public function test_constructor_with_a_value(): void
     {
         $id = 'foo';
-        $value = ['bar'];
+        $value = ['a' => 'bar'];
         $node = new TreeNode($id, $value);
 
         $this->assertEquals($id, $node->getId());
@@ -34,7 +34,7 @@ class TreeNodeTest extends TestCase
     public function test_constructor_with_a_value_and_children(): void
     {
         $id = 'foo';
-        $value = ['bar'];
+        $value = ['a' => 'bar'];
         $children = [
             new TreeNode('baz'),
             new TreeNode('qux'),
@@ -51,7 +51,7 @@ class TreeNodeTest extends TestCase
     public function test_constructor_with_a_value_and_children_and_a_parent(): void
     {
         $id = 'foo';
-        $value = ['bar'];
+        $value = ['a' => 'bar'];
         $children = [
             new TreeNode('baz'),
             new TreeNode('qux'),
@@ -70,17 +70,14 @@ class TreeNodeTest extends TestCase
     {
         $node = new TreeNode('foo');
 
-        $result = $node->setId('bar');
-
-        $this->assertEquals('foo', $result);
-        $this->assertEquals('bar', $node->getId());
+        $this->assertEquals('foo', $node->getId());
     }
 
     public function test_get_value(): void
     {
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar']);
 
-        $this->assertEquals(['bar'], $node->getValue());
+        $this->assertEquals(['a' => 'bar'], $node->getValue());
     }
 
     public function test_get_value_token(): void
@@ -94,7 +91,7 @@ class TreeNodeTest extends TestCase
 
     public function test_get_undefined_value_token(): void
     {
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar']);
 
         $result = $node->getValueToken();
 
@@ -112,7 +109,7 @@ class TreeNodeTest extends TestCase
 
     public function test_get_undefined_value_value(): void
     {
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar']);
 
         $result = $node->getValueValue();
 
@@ -121,7 +118,7 @@ class TreeNodeTest extends TestCase
 
     public function test_is_token(): void
     {
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar']);
 
         $this->assertTrue($node->isToken());
     }
@@ -137,7 +134,7 @@ class TreeNodeTest extends TestCase
     {
         $childA = new TreeNode('baz');
         $childB = new TreeNode('qux');
-        $node = new TreeNode('foo', ['bar'], [$childA]);
+        $node = new TreeNode('foo', ['a' => 'bar'], [$childA]);
 
         $result = $node->prependChild($childB);
 
@@ -150,7 +147,7 @@ class TreeNodeTest extends TestCase
     {
         $childA = new TreeNode('baz');
         $childB = new TreeNode('qux');
-        $node = new TreeNode('foo', ['bar'], [$childA]);
+        $node = new TreeNode('foo', ['a' => 'bar'], [$childA]);
 
         $result = $node->appendChild($childB);
 
@@ -159,25 +156,11 @@ class TreeNodeTest extends TestCase
         $this->assertEquals([$childA, $childB], $node->getChildren());
     }
 
-    public function test_set_children(): void
-    {
-        $childA = new TreeNode('baz');
-        $childB = new TreeNode('qux');
-        $childC = new TreeNode('hello');
-        $node = new TreeNode('foo', ['bar'], [$childA]);
-
-        $result = $node->setChildren([$childB, $childC]);
-
-        $this->assertEquals([$childA], $result);
-        $this->assertEquals(2, $node->getChildrenNumber());
-        $this->assertEquals([$childB, $childC], $node->getChildren());
-    }
-
     public function test_get_child(): void
     {
         $childA = new TreeNode('baz');
         $childB = new TreeNode('qux');
-        $node = new TreeNode('foo', ['bar'], [$childA, $childB]);
+        $node = new TreeNode('foo', ['a' => 'bar'], [$childA, $childB]);
 
         $result = $node->getChild(0);
         $this->assertSame($childA, $result);
@@ -188,7 +171,7 @@ class TreeNodeTest extends TestCase
 
     public function test_get_undefined_child(): void
     {
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar']);
 
         $result = $node->getChild(0);
 
@@ -199,7 +182,7 @@ class TreeNodeTest extends TestCase
     {
         $childA = new TreeNode('baz');
         $childB = new TreeNode('qux');
-        $node = new TreeNode('foo', ['bar'], [$childA, $childB]);
+        $node = new TreeNode('foo', ['a' => 'bar'], [$childA, $childB]);
 
         $result = $node->getChildren();
 
@@ -210,26 +193,22 @@ class TreeNodeTest extends TestCase
     {
         $childA = new TreeNode('baz');
         $childB = new TreeNode('qux');
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar'], [$childA, $childB]);
 
-        $result = $node->getChildrenNumber();
-        $this->assertEquals(0, $result);
-
-        $node->setChildren([$childA, $childB]);
         $result = $node->getChildrenNumber();
         $this->assertEquals(2, $result);
     }
 
     public function test_child_exists(): void
     {
-        $node = new TreeNode('foo', ['bar'], [new TreeNode('baz')]);
+        $node = new TreeNode('foo', ['a' => 'bar'], [new TreeNode('baz')]);
 
         $this->assertTrue($node->childExists(0));
     }
 
     public function test_child_does_not_exist(): void
     {
-        $node = new TreeNode('foo', ['bar']);
+        $node = new TreeNode('foo', ['a' => 'bar']);
 
         $this->assertFalse($node->childExists(0));
     }
@@ -237,7 +216,7 @@ class TreeNodeTest extends TestCase
     public function test_set_parent(): void
     {
         $parent = new TreeNode('baz');
-        $node = new TreeNode('foo', ['bar'], [], $parent);
+        $node = new TreeNode('foo', ['a' => 'bar'], [], $parent);
 
         $this->assertSame($parent, $node->getParent());
     }
@@ -245,7 +224,7 @@ class TreeNodeTest extends TestCase
     public function test_get_parent(): void
     {
         $parent = new TreeNode('qux');
-        $node = new TreeNode('foo', ['bar'], [], new TreeNode('baz'));
+        $node = new TreeNode('foo', ['a' => 'bar'], [], new TreeNode('baz'));
 
         $node->setParent($parent);
 

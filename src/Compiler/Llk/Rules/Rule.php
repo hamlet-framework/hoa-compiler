@@ -56,27 +56,14 @@ abstract class Rule
         $this->setNodeId($nodeId);
     }
 
-    public function setName(string $name): string|int
+    public function setName(string $name): void
     {
-        $old = $this->name;
         $this->name = $name;
-        return $old;
     }
 
     public function getName(): string|int
     {
         return $this->name;
-    }
-
-    /**
-     * @param C $children
-     * @return C
-     */
-    protected function setChildren(mixed $children): mixed
-    {
-        $old = $this->children;
-        $this->children = $children;
-        return $old;
     }
 
     /**
@@ -87,10 +74,8 @@ abstract class Rule
         return $this->children;
     }
 
-    public function setNodeId(?string $nodeId): ?string
+    public function setNodeId(?string $nodeId): void
     {
-        $old = $this->nodeId;
-
         if ($nodeId && ($pos = strpos($nodeId, ':')) !== false) {
             $this->nodeId = substr($nodeId, 0, $pos);
             $this->nodeOptions = str_split(substr($nodeId, $pos + 1));
@@ -98,8 +83,6 @@ abstract class Rule
             $this->nodeId = $nodeId;
             $this->nodeOptions = [];
         }
-
-        return $old;
     }
 
     public function getNodeId(): ?string
@@ -112,10 +95,8 @@ abstract class Rule
         return $this->nodeOptions;
     }
 
-    public function setDefaultId(string $defaultId): ?string
+    public function setDefaultId(string $defaultId): void
     {
-        $old = $this->defaultId;
-
         if (($pos = strpos($defaultId, ':')) !== false) {
             $this->defaultId = substr($defaultId, 0, $pos);
             $this->defaultOptions = str_split(substr($defaultId, $pos + 1));
@@ -123,8 +104,6 @@ abstract class Rule
             $this->defaultId = $defaultId;
             $this->defaultOptions = [];
         }
-
-        return $old;
     }
 
     public function getDefaultId(): ?string
@@ -140,12 +119,10 @@ abstract class Rule
         return $this->defaultOptions;
     }
 
-    public function setPPRepresentation(string $pp): ?string
+    public function setPPRepresentation(string $pp): void
     {
-        $old = $this->pp;
         $this->pp = $pp;
         $this->transitional = false;
-        return $old;
     }
 
     public function getPPRepresentation(): ?string
