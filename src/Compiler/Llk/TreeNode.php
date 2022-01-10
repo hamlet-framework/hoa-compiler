@@ -11,35 +11,22 @@ use Hoa\Compiler\Visitor\Visit;
 final class TreeNode implements Element
 {
     /**
-     * Value of the node (non-null for token nodes).
-     * @var ?array<string,?string>
-     */
-    protected ?array $value = null;
-
-    /**
-     * Parent.
-     */
-    protected ?TreeNode $parent = null;
-
-    /**
      * Attached data.
      */
-    protected array $data = [];
+    private array $data = [];
 
     /**
      * @param string $id Should be something like #ruleName or token
-     * @param ?array<string,?string> $value
+     * @param ?array<string,?string> $value Value of the node (non-null for token nodes).
      * @param array<TreeNode> $children
      * @param ?TreeNode $parent
      */
-    public function __construct(private string $id, ?array $value = null, private array $children = [], ?TreeNode $parent = null)
-    {
-        if (!empty($value)) {
-            $this->value = $value;
-        }
-        if (null !== $parent) {
-            $this->parent = $parent;
-        }
+    public function __construct(
+        private string $id,
+        private ?array $value = null,
+        private array $children = [],
+        private ?TreeNode $parent = null
+    ) {
     }
 
     public function getId(): string
@@ -73,21 +60,19 @@ final class TreeNode implements Element
         return !empty($this->value);
     }
 
-    public function prependChild(TreeNode $child): TreeNode
+    public function prependChild(TreeNode $child): void
     {
         array_unshift($this->children, $child);
-        return $this;
     }
 
-    public function appendChild(TreeNode $child): TreeNode
+    public function appendChild(TreeNode $child): void
     {
         $this->children[] = $child;
-        return $this;
     }
 
     public function getChild(int $i): ?TreeNode
     {
-        return $this->childExists($i) ? $this->children[$i] : null;
+        return $this->children[$i] ?? null;
     }
 
     /**

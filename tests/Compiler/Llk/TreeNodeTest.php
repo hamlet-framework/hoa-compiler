@@ -136,9 +136,8 @@ class TreeNodeTest extends TestCase
         $childB = new TreeNode('qux');
         $node = new TreeNode('foo', ['a' => 'bar'], [$childA]);
 
-        $result = $node->prependChild($childB);
+        $node->prependChild($childB);
 
-        $this->assertSame($node, $result);
         $this->assertEquals(2, $node->getChildrenNumber());
         $this->assertEquals([$childB, $childA], $node->getChildren());
     }
@@ -149,9 +148,8 @@ class TreeNodeTest extends TestCase
         $childB = new TreeNode('qux');
         $node = new TreeNode('foo', ['a' => 'bar'], [$childA]);
 
-        $result = $node->appendChild($childB);
+        $node->appendChild($childB);
 
-        $this->assertSame($node, $result);
         $this->assertEquals(2, $node->getChildrenNumber());
         $this->assertEquals([$childA, $childB], $node->getChildren());
     }
