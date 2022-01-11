@@ -49,7 +49,7 @@ final class Parser
 
     /**
      * @param array<string,array<string,string>> $tokens Associative array (token name => token regex), to be defined in precedence order.
-     * @param array<Rule> $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object.
+     * @param array<Rule> $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object. // @todo replace with Rules collection
      * @param array<string,string|int|bool> $pragmas List of pragmas.
      */
     public function __construct(
