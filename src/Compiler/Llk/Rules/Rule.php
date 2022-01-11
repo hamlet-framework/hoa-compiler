@@ -3,7 +3,7 @@
 namespace Hoa\Compiler\Llk\Rules;
 
 /**
- * @template C
+ * @template C as array<Rule|InvocationRule|int|string>|int|string|null
  */
 abstract class Rule
 {
@@ -11,7 +11,7 @@ abstract class Rule
      * RuleException's children. Can be an array of names or a single name.
      * @var C
      */
-    protected array|string|int|null $children;
+    protected array|int|string|null $children;
 
     /**
      * Node ID.

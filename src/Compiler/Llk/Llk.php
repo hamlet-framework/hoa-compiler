@@ -49,7 +49,7 @@ abstract class Llk
         $outPragmas = null;
         $outExtra = null;
 
-        $escapeRuleName = function (string|int $ruleName) use ($parser): string|int {
+        $escapeRuleName = function (int|string $ruleName) use ($parser): string|int {
             if (true == $parser->getRule($ruleName)?->isTransitional()) {
                 return $ruleName;
             }
@@ -92,23 +92,17 @@ abstract class Llk
                 }
 
                 // Children.
-                /**
-                 * @psalm-suppress MixedAssignment
-                 */
                 $ruleChildren = $rule->getChildren();
 
                 if (null === $ruleChildren) {
                     $arguments['children'] = 'null';
-                } elseif (false === is_array($ruleChildren)) {
+                } elseif (is_array($ruleChildren)) {
                     /**
-                     * @psalm-suppress MixedArgument
+                     * @psalm-suppress PossiblyInvalidArgument
                      */
-                    $arguments['children'] = $escapeRuleName($ruleChildren);
+                    $arguments['children'] = '[' . implode(', ', array_map($escapeRuleName, $ruleChildren)) . ']';
                 } else {
-                    $arguments['children'] =
-                        '[' .
-                        implode(', ', array_map($escapeRuleName, $ruleChildren)) .
-                        ']';
+                    $arguments['children'] = $escapeRuleName($ruleChildren);
                 }
             }
 

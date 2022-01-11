@@ -13,7 +13,7 @@ class InvocationTest extends TestCase
         $invocation = new class($rule, $data) extends InvocationRule {
         };
 
-        $this->assertEquals($rule, $invocation->getRule());
+        $this->assertEquals($rule, $invocation->getName());
         $this->assertEquals($data, $invocation->getData());
         $this->assertEmpty($invocation->getTodo());
         $this->assertEquals(-1, $invocation->getDepth());
@@ -28,7 +28,7 @@ class InvocationTest extends TestCase
         $invocation = new class($rule, $data, $todo) extends InvocationRule {
         };
 
-        $this->assertEquals($rule, $invocation->getRule());
+        $this->assertEquals($rule, $invocation->getName());
         $this->assertEquals($data, $invocation->getData());
         $this->assertEquals($todo, $invocation->getTodo());
         $this->assertEquals(-1, $invocation->getDepth());
@@ -44,7 +44,7 @@ class InvocationTest extends TestCase
         $invocation = new class($rule, $data, $todo, $depth) extends InvocationRule {
         };
 
-        $this->assertEquals($rule, $invocation->getRule());
+        $this->assertEquals($rule, $invocation->getName());
         $this->assertEquals($data, $invocation->getData());
         $this->assertEquals($todo, $invocation->getTodo());
         $this->assertEquals($depth, $invocation->getDepth());

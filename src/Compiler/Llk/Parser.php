@@ -170,9 +170,12 @@ final class Parser
                     $this->depth--;
                 }
             } else {
-                $ruleName = $rule->getRule();
+                $ruleName = $rule->getName();
                 $next = $rule->getData();
                 $zeRule = $this->rules[$ruleName];
+                /**
+                 * @psalm-suppress MixedArgumentTypeCoercion
+                 */
                 $out = $this->_parse($tokenSequence, $zeRule, $next);
                 if (!$out && !$this->backtrack($tokenSequence)) {
                     return false;
@@ -188,7 +191,6 @@ final class Parser
      * @param Rule $currentRule Current rule.
      * @param string|int $nextRuleIndex Next rule index.
      * @return bool
-     * @psalm-suppress MixedAssignment
      */
     private function _parse(Buffer $tokenSequence, Rule $currentRule, string|int $nextRuleIndex): bool
     {
@@ -336,10 +338,10 @@ final class Parser
         do {
             $last = array_pop($this->trace);
             if ($last instanceof EntryRule) {
-                $zeRule = $this->rules[$last->getRule()];
+                $zeRule = $this->rules[$last->getName()];
                 $found = $zeRule instanceof ChoiceRule;
             } elseif ($last instanceof ExitRule) {
-                $zeRule = $this->rules[$last->getRule()];
+                $zeRule = $this->rules[$last->getName()];
                 $found = $zeRule instanceof RepetitionRule;
             } elseif ($last instanceof TokenRule) {
                 $tokenSequence->previous();
@@ -354,7 +356,7 @@ final class Parser
         }
 
         assert($last instanceof InvocationRule);
-        $rule = $last->getRule();
+        $rule = $last->getName();
         $next = ((int) $last->getData()) + 1;
         $this->depth = $last->getDepth();
         $this->todo = $last->getTodo();
@@ -384,14 +386,14 @@ final class Parser
             $trace = $this->trace[$i];
 
             if ($trace instanceof EntryRule) {
-                $ruleName = $trace->getRule();
+                $ruleName = $trace->getName();
                 $rule = $this->rules[$ruleName];
                 $isRule = !$trace->isTransitional();
                 $nextTrace = $this->trace[$i + 1];
                 $id = $rule->getNodeId();
 
                 // Optimization: Skip empty trace sequence.
-                if ($nextTrace instanceof ExitRule && $nextTrace->getRule() == $ruleName) {
+                if ($nextTrace instanceof ExitRule && $nextTrace->getName() == $ruleName) {
                     $i += 2;
                     continue;
                 }
