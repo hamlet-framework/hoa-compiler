@@ -23,7 +23,7 @@ final class Parser
     /**
      * Possible token causing an error.
      */
-    private ?Token $_errorToken = null;
+    private ?Token $errorToken = null;
 
     /**
      * Trace of activated rules.
@@ -78,7 +78,7 @@ final class Parser
         $tokenSequence = new Buffer($lexer->run($text, $this->tokens), $bufferSize);
         $tokenSequence->rewind();
 
-        $this->_errorToken = null;
+        $this->errorToken = null;
         $this->trace = [];
 
         if ($axiomRule === null || !array_key_exists($axiomRule, $this->rules)) {
@@ -97,12 +97,12 @@ final class Parser
             }
 
             if (!$this->backtrack($tokenSequence)) {
-                $token = $this->_errorToken;
+                $token = $this->errorToken;
 
                 /**
                  * @psalm-suppress RedundantCondition
                  */
-                if (null === $this->_errorToken) {
+                if (null === $this->errorToken) {
                     $token = $tokenSequence->current();
                 }
 
@@ -257,7 +257,7 @@ final class Parser
             array_pop($this->todo);
             $this->trace[] = $zzeRule;
             $tokenSequence->next();
-            $this->_errorToken = $tokenSequence->current();
+            $this->errorToken = $tokenSequence->current();
 
             return true;
         } elseif ($currentRule instanceof ConcatenationRule) {

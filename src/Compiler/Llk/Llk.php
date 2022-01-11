@@ -26,7 +26,8 @@ abstract class Llk
 
         [$tokens, $rawRules, $pragmas] = static::parseGrammar($grammar, $path);
 
-        $ruleAnalyzer = new Rules\AnalyzerRule($tokens);
+        // @todo not sure why it cannot be (new RuleAnalyzer)->analyze($tokens, $rawRules);
+        $ruleAnalyzer = new Rules\RuleAnalyzer($tokens);
         $rules = $ruleAnalyzer->analyzeRules($rawRules);
         return new Parser($tokens, $rules, $pragmas);
     }
@@ -50,10 +51,9 @@ abstract class Llk
         $outExtra = null;
 
         $escapeRuleName = function (int|string $ruleName) use ($parser): string|int {
-            if (true == $parser->getRule($ruleName)?->isTransitional()) {
+            if ($parser->getRule($ruleName)?->isTransitional()) {
                 return $ruleName;
             }
-
             return '\'' . $ruleName . '\'';
         };
 
@@ -94,7 +94,7 @@ abstract class Llk
                 // Children.
                 $ruleChildren = $rule->getChildren();
 
-                if (null === $ruleChildren) {
+                if (is_null($ruleChildren)) {
                     $arguments['children'] = 'null';
                 } elseif (is_array($ruleChildren)) {
                     /**
@@ -109,7 +109,7 @@ abstract class Llk
             // Node ID.
             $nodeId = $rule->getNodeId();
 
-            if (null === $nodeId) {
+            if (is_null($nodeId)) {
                 $arguments['nodeId'] = 'null';
             } else {
                 $arguments['nodeId'] = '\'' . $nodeId . '\'';
@@ -194,6 +194,8 @@ abstract class Llk
      * @param string $streamName The name of the stream containing the grammar.
      * @return array{array<string,array<string,string>>,array<string,string>,array<string,string|int|bool>}
      * @throws Exception
+     *
+     * @todo this is a testable method, also it's not really parsing, but rather preprocessing
      */
     public static function parseGrammar(string $pp, string $streamName): array
     {
@@ -202,13 +204,15 @@ abstract class Llk
         $tokens = ['default' => []];
         $rules = [];
 
-        for ($i = 0, $m = count($lines); $i < $m; ++$i) {
+        for ($i = 0, $m = count($lines); $i < $m; $i++) {
             $line = rtrim($lines[$i]);
 
+            // Skip comments
             if (empty($line) || str_starts_with($line, '//')) {
                 continue;
             }
 
+            // Parse instructions: pragmas, skips and tokens
             if (str_starts_with($line, '%')) {
                 if (preg_match('#^%pragma\h+([^\h]+)\h+(.*)$#u', $line, $matches) !== 0) {
                     switch ($matches[2]) {
@@ -226,7 +230,7 @@ abstract class Llk
                             }
                     }
                     $pragmas[$matches[1]] = $pragmaValue;
-                } elseif (0 !== preg_match('#^%skip\h+(?:([^:]+):)?([^\h]+)\h+(.*)$#u', $line, $matches)) {
+                } elseif (preg_match('#^%skip\h+(?:([^:]+):)?([^\h]+)\h+(.*)$#u', $line, $matches) !== 0) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }
@@ -242,19 +246,16 @@ abstract class Llk
                             $matches[3] .
                             ')';
                     }
-                } elseif (0 !== preg_match('#^%token\h+(?:([^:]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches)) {
+                } elseif (preg_match('#^%token\h+(?:([^:]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches) !== 0) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }
-
                     if (isset($matches[4]) && !empty($matches[4])) {
                         $matches[2] = $matches[2] . ':' . $matches[4];
                     }
-
                     if (!isset($tokens[$matches[1]])) {
                         $tokens[$matches[1]] = [];
                     }
-
                     $tokens[$matches[1]][$matches[2]] = $matches[3];
                 } else {
                     $message = sprintf(
@@ -266,26 +267,25 @@ abstract class Llk
                     );
                     throw new Exception($message, 1);
                 }
-
                 continue;
             }
 
             $ruleName = substr($line, 0, -1);
             $rule = '';
-            ++$i;
+            $i++;
             while ($i < $m
                 && strlen($lines[$i]) > 0
                 && (str_starts_with($lines[$i], ' ') || str_starts_with($lines[$i], "\t") || str_starts_with($lines[$i], '//'))) {
                 if (str_starts_with($lines[$i], '//')) {
-                    ++$i;
+                    // Skip comments inside of rules
+                    $i++;
                     continue;
                 }
                 $rule .= ' ' . trim($lines[$i++]);
             }
             if (isset($lines[$i][0])) {
-                --$i;
+                $i--;
             }
-
             $rules[$ruleName] = $rule;
         }
 

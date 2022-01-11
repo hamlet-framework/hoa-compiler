@@ -8,7 +8,7 @@ use Hamlet\Compiler\Llk\Lexer;
 use Hamlet\Compiler\Llk\Token;
 use Hamlet\Iterator\Lookahead;
 
-final class AnalyzerRule
+final class RuleAnalyzer
 {
     /**
      * PP lexemes.
@@ -78,7 +78,7 @@ final class AnalyzerRule
         $lexer = new Lexer();
 
         foreach ($rules as $key => $value) {
-            $lookahead = new Lookahead($lexer->run($value, AnalyzerRule::$_ppLexemes));
+            $lookahead = new Lookahead($lexer->run($value, RuleAnalyzer::$_ppLexemes));
             $lookahead->rewind();
 
             $this->ruleName = $key;
