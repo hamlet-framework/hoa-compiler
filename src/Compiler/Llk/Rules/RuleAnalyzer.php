@@ -61,13 +61,13 @@ final class RuleAnalyzer
     /**
      * Build the analyzer of the rules (does not analyze the rules).
      *
-     * @param array<string,string> $rules Rules to be analyzed.
+     * @param array<string,string> $rawRules Rules to be analyzed.
      * @return array<Rule>
      * @throws Exception
      */
-    public function analyzeRules(array $rules): array
+    public function analyzeRules(array $rawRules): array
     {
-        if (empty($rules)) {
+        if (empty($rawRules)) {
             throw new Compiler\Exceptions\RuleException('No rules specified!', 0);
         }
 
@@ -77,36 +77,36 @@ final class RuleAnalyzer
         $this->parsedRules = [];
         $lexer = new Lexer();
 
-        foreach ($rules as $key => $value) {
-            $lookahead = new Lookahead($lexer->run($value, RuleAnalyzer::$_ppLexemes));
-            $lookahead->rewind();
+        foreach ($rawRules as $ruleName => $ruleBody) {
+            $ruleTokens = new Lookahead($lexer->run($ruleBody, RuleAnalyzer::$_ppLexemes));
+            $ruleTokens->rewind();
 
-            $this->ruleName = $key;
+            $this->ruleName = $ruleName;
             $nodeId = null;
 
-            if (str_starts_with($key, '#')) {
-                $nodeId = $key;
-                $key = substr($key, 1);
+            if (str_starts_with($ruleName, '#')) {
+                $nodeId = $ruleName;
+                $ruleName = substr($ruleName, 1);
             }
 
             $pNodeId = $nodeId;
-            $rule = $this->rule($lookahead, $rules, $pNodeId);
+            $rule = $this->rule($ruleTokens, $rawRules, $pNodeId);
 
             if ($rule === null) {
-                $message = sprintf('Error while parsing rule %s.', $key);
+                $message = sprintf('Error while parsing rule %s.', $ruleName);
                 throw new Exception($message, 1);
             }
 
             $zeRule = $this->parsedRules[$rule];
-            $zeRule->setName($key);
-            $zeRule->setPPRepresentation($value);
+            $zeRule->setName($ruleName);
+            $zeRule->setPPRepresentation($ruleBody);
 
             if ($nodeId !== null) {
                 $zeRule->setDefaultId($nodeId);
             }
 
             unset($this->parsedRules[$rule]);
-            $this->parsedRules[$key] = $zeRule;
+            $this->parsedRules[$ruleName] = $zeRule;
         }
 
         return $this->parsedRules;
@@ -114,30 +114,30 @@ final class RuleAnalyzer
 
     /**
      * Implementation of “rule”.
-     * @param Lookahead<mixed,Token> $lookahead
+     * @param Lookahead<mixed,Token> $ruleTokens
      * @param array<string,string> $rules
      * @param string|null $pNodeId
      * @return string|int|null
      */
-    private function rule(Lookahead $lookahead, array $rules, ?string &$pNodeId): string|int|null
+    private function rule(Lookahead $ruleTokens, array $rules, ?string &$pNodeId): string|int|null
     {
-        return $this->choice($lookahead, $rules, $pNodeId);
+        return $this->choice($ruleTokens, $rules, $pNodeId);
     }
 
     /**
      * Implementation of “choice”.
-     * @param Lookahead<mixed,Token> $lookahead
-     * @param array<string,string> $rules
+     * @param Lookahead<mixed,Token> $ruleTokens
+     * @param array<string,string> $rawRules
      * @param ?string $pNodeId
      * @return string|int|null
      */
-    private function choice(Lookahead $lookahead, array $rules, ?string &$pNodeId): string|int|null
+    private function choice(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
     {
         $children = [];
 
         // concatenation() …
         $nNodeId = $pNodeId;
-        $rule = $this->concatenation($lookahead, $rules, $nNodeId);
+        $rule = $this->concatenation($ruleTokens, $rawRules, $nNodeId);
 
         if ($rule === null) {
             return null;
@@ -151,11 +151,11 @@ final class RuleAnalyzer
         $others = false;
 
         // … ( ::or:: concatenation() )*
-        while ($lookahead->current()->token === 'or') {
-            $lookahead->next();
+        while ($ruleTokens->current()->token === 'or') {
+            $ruleTokens->next();
             $others = true;
             $nNodeId = $pNodeId;
-            $rule = $this->concatenation($lookahead, $rules, $nNodeId);
+            $rule = $this->concatenation($ruleTokens, $rawRules, $nNodeId);
 
             if ($rule === null) {
                 return null;
@@ -182,17 +182,17 @@ final class RuleAnalyzer
 
     /**
      * Implementation of “concatenation”.
-     * @param Lookahead<mixed,Token> $lookahead
-     * @param array<string,string> $rules
+     * @param Lookahead<mixed,Token> $ruleTokens
+     * @param array<string,string> $rawRules
      * @param string|null $pNodeId
      * @return string|int|null
      */
-    private function concatenation(Lookahead $lookahead, array $rules, ?string &$pNodeId): string|int|null
+    private function concatenation(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
     {
         $children = [];
 
         // repetition() …
-        $rule = $this->repetition($lookahead, $rules, $pNodeId);
+        $rule = $this->repetition($ruleTokens, $rawRules, $pNodeId);
 
         if ($rule === null) {
             return null;
@@ -202,7 +202,7 @@ final class RuleAnalyzer
         $others = false;
 
         // … repetition()*
-        while (($r1 = $this->repetition($lookahead, $rules, $pNodeId)) !== null) {
+        while (($r1 = $this->repetition($ruleTokens, $rawRules, $pNodeId)) !== null) {
             $children[] = $r1;
             $others = true;
         }
@@ -219,15 +219,15 @@ final class RuleAnalyzer
 
     /**
      * Implementation of “repetition”.
-     * @param Lookahead<mixed,Token> $lookahead
-     * @param array<string,string> $rules
+     * @param Lookahead<mixed,Token> $ruleTokens
+     * @param array<string,string> $rawRules
      * @param string|null $pNodeId
      * @return string|int|null
      */
-    private function repetition(Lookahead $lookahead, array $rules, ?string &$pNodeId): string|int|null
+    private function repetition(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
     {
         // simple() …
-        $children = $this->simple($lookahead, $rules, $pNodeId);
+        $children = $this->simple($ruleTokens, $rawRules, $pNodeId);
 
         if ($children === null) {
             return null;
@@ -236,64 +236,64 @@ final class RuleAnalyzer
         // … quantifier()?
         $min = -1;
         $max = -1;
-        switch ($lookahead->current()->token) {
+        switch ($ruleTokens->current()->token) {
             case 'zero_or_one':
                 $min = 0;
                 $max = 1;
-                $lookahead->next();
+                $ruleTokens->next();
 
                 break;
 
             case 'one_or_more':
                 $min = 1;
                 $max = -1;
-                $lookahead->next();
+                $ruleTokens->next();
 
                 break;
 
             case 'zero_or_more':
                 $min = 0;
                 $max = -1;
-                $lookahead->next();
+                $ruleTokens->next();
 
                 break;
 
             case 'n_to_m':
-                $handle = trim($lookahead->current()->value, '{}');
+                $handle = trim($ruleTokens->current()->value, '{}');
                 $nm = explode(',', $handle);
                 $min = (int)trim($nm[0]);
                 $max = (int)trim($nm[1]);
-                $lookahead->next();
+                $ruleTokens->next();
 
                 break;
 
             case 'zero_to_m':
                 $min = 0;
-                $max = (int)trim($lookahead->current()->value, '{,}');
-                $lookahead->next();
+                $max = (int)trim($ruleTokens->current()->value, '{,}');
+                $ruleTokens->next();
 
                 break;
 
             case 'n_or_more':
-                $min = (int)trim($lookahead->current()->value, '{,}');
+                $min = (int)trim($ruleTokens->current()->value, '{,}');
                 $max = -1;
-                $lookahead->next();
+                $ruleTokens->next();
 
                 break;
 
             case 'exactly_n':
-                $handle = trim($lookahead->current()->value, '{}');
+                $handle = trim($ruleTokens->current()->value, '{}');
                 $min = (int)$handle;
                 $max = $min;
-                $lookahead->next();
+                $ruleTokens->next();
 
                 break;
         }
 
         // … <node>?
-        if ('node' === $lookahead->current()->token) {
-            $pNodeId = $lookahead->current()->value;
-            $lookahead->next();
+        if ('node' === $ruleTokens->current()->token) {
+            $pNodeId = $ruleTokens->current()->value;
+            $ruleTokens->next();
         }
 
         if ($min == -1 && $max == -1) {
@@ -313,31 +313,31 @@ final class RuleAnalyzer
 
     /**
      * Implementation of “simple”.
-     * @param Lookahead<mixed,Token> $lookahead
-     * @param array<string,string> $rules
+     * @param Lookahead<mixed,Token> $ruleTokens
+     * @param array<string,string> $rawRules
      * @param string|null $pNodeId
      * @return int|string|null
      */
-    private function simple(Lookahead $lookahead, array $rules, ?string &$pNodeId): string|int|null
+    private function simple(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
     {
-        if ($lookahead->current()->token === 'capturing_') {
-            $lookahead->next();
-            $rule = $this->choice($lookahead, $rules, $pNodeId);
+        if ($ruleTokens->current()->token === 'capturing_') {
+            $ruleTokens->next();
+            $rule = $this->choice($ruleTokens, $rawRules, $pNodeId);
 
             if ($rule === null) {
                 return null;
             }
 
-            if ($lookahead->current()->token != '_capturing') {
+            if ($ruleTokens->current()->token != '_capturing') {
                 return null;
             }
 
-            $lookahead->next();
+            $ruleTokens->next();
             return $rule;
         }
 
-        if ($lookahead->current()->token === 'skipped') {
-            $tokenName = trim($lookahead->current()->value, ':');
+        if ($ruleTokens->current()->token === 'skipped') {
+            $tokenName = trim($ruleTokens->current()->value, ':');
             [$tokenName, $unificationId, $exists] = $this->parseTokenName($tokenName);
             if (!$exists) {
                 $message = sprintf('TokenRule ::%s:: does not exist in rule %s.', $tokenName, $this->ruleName ?? 'unknown');
@@ -347,13 +347,13 @@ final class RuleAnalyzer
             $name = $this->ruleCounter->next();
             $tokenRule = new TokenRule((string)$name, $tokenName, null, $unificationId, false);
             $this->parsedRules[$name] = $tokenRule;
-            $lookahead->next();
+            $ruleTokens->next();
 
             return $name;
         }
 
-        if ($lookahead->current()->token === 'kept') {
-            $tokenName = trim($lookahead->current()->value, '<>');
+        if ($ruleTokens->current()->token === 'kept') {
+            $tokenName = trim($ruleTokens->current()->value, '<>');
             [$tokenName, $unificationId, $exists] = $this->parseTokenName($tokenName);
             if (!$exists) {
                 $message = sprintf('TokenRule <%s> does not exist in rule %s.', $tokenName, $this->ruleName ?? 'unknown');
@@ -363,26 +363,26 @@ final class RuleAnalyzer
             $name = $this->ruleCounter->next();
             $tokenRule = new TokenRule($name, $tokenName, null, $unificationId, true);
             $this->parsedRules[$name] = $tokenRule;
-            $lookahead->next();
+            $ruleTokens->next();
 
             return $name;
         }
 
-        if ($lookahead->current()->token === 'named') {
-            $tokenName = rtrim($lookahead->current()->value, '()');
-            if (!array_key_exists($tokenName, $rules) && !array_key_exists('#' . $tokenName, $rules)) {
+        if ($ruleTokens->current()->token === 'named') {
+            $tokenName = rtrim($ruleTokens->current()->value, '()');
+            if (!array_key_exists($tokenName, $rawRules) && !array_key_exists('#' . $tokenName, $rawRules)) {
                 $message = sprintf('Cannot call rule %s() in rule %s because it does not exist.', $tokenName, $this->ruleName ?? 'unknown');
                 throw new Compiler\Exceptions\RuleException($message, 5);
             }
 
-            if ($lookahead->key() === 0 && $lookahead->getNext()->token === 'EOF') {
+            if ($ruleTokens->key() === 0 && $ruleTokens->getNext()->token === 'EOF') {
                 $name = $this->ruleCounter->next();
                 $this->parsedRules[$name] = new ConcatenationRule($name, [$tokenName], null);
             } else {
                 $name = $tokenName;
             }
 
-            $lookahead->next();
+            $ruleTokens->next();
 
             return $name;
         }
