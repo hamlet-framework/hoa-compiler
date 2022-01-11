@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
 final class Token
 {

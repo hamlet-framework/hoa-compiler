@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoa\Iterator;
+namespace Hamlet\Iterator;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;

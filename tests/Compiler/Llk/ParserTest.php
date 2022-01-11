@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
-use Hoa\Compiler\Visitor\Dump;
+use Hamlet\Compiler\Visitor\Dump;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase

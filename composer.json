@@ -1,6 +1,6 @@
 {
   "name": "hamlet-framework/hoa-compiler",
-  "description": "The Hoa/Compiler library.",
+  "description": "A port of the Hoa/Compiler library.",
   "type": "library",
   "keywords": [
     "library", "compiler", "grammar", "language", "ll1",
@@ -35,12 +35,17 @@
   },
   "autoload": {
     "psr-4": {
-      "Hoa\\": "src/"
+      "Hamlet\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Hoa\\": "tests/"
+      "Hamlet\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true
     }
   }
 }

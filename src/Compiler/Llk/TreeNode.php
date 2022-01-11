@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
-use Hoa\Compiler\Visitor\Element;
-use Hoa\Compiler\Visitor\Visit;
+use Hamlet\Compiler\Visitor\Element;
+use Hamlet\Compiler\Visitor\Visit;
 
 /**
  * @implements Element<TreeNode,string>

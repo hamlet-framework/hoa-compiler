@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
-use Hoa\Compiler;
-use Hoa\Compiler\Exceptions\Exception;
+use Hamlet\Compiler;
+use Hamlet\Compiler\Exceptions\Exception;
 
 abstract class Llk
 {
@@ -167,7 +167,7 @@ abstract class Llk
         }
 
         return
-            'class ' . $className . ' extends \Hoa\Compiler\Llk\Parser' . "\n" .
+            'class ' . $className . ' extends \Hamlet\Compiler\Llk\Parser' . "\n" .
             '{' . "\n" .
             '    public function __construct()' . "\n" .
             '    {' . "\n" .

@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
 use Generator;
-use Hoa\Compiler;
-use Hoa\Compiler\Exceptions\LexerException;
-use Hoa\Compiler\Exceptions\UnrecognizedTokenException;
+use Hamlet\Compiler;
+use Hamlet\Compiler\Exceptions\LexerException;
+use Hamlet\Compiler\Exceptions\UnrecognizedTokenException;
 use SplStack;
 
 class Lexer

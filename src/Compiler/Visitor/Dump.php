@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Visitor;
+namespace Hamlet\Compiler\Visitor;
 
-use Hoa\Compiler\Llk\TreeNode;
+use Hamlet\Compiler\Llk\TreeNode;
 
 /**
  * @implements Visit<TreeNode,string>

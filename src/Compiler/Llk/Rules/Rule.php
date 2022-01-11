@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
 /**
  * @template C as array<Rule|InvocationRule|int|string>|int|string|null

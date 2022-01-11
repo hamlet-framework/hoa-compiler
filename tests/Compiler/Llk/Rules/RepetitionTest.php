@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
-use Hoa\Compiler\Exceptions\RuleException;
+use Hamlet\Compiler\Exceptions\RuleException;
 use PHPUnit\Framework\TestCase;
 
 class RepetitionTest extends TestCase

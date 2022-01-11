@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoa\Iterator;
+namespace Hamlet\Iterator;
 
 use JakubOnderka\PhpParallelLint\ArrayIterator;
 use PHPUnit\Framework\TestCase;

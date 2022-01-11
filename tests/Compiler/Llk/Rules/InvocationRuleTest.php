@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
 use PHPUnit\Framework\TestCase;
 

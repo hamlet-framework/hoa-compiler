@@ -1,18 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
-use Hoa\Compiler;
-use Hoa\Compiler\Exceptions\UnexpectedTokenException;
-use Hoa\Compiler\Llk\Rules\ChoiceRule;
-use Hoa\Compiler\Llk\Rules\ConcatenationRule;
-use Hoa\Compiler\Llk\Rules\EntryRule;
-use Hoa\Compiler\Llk\Rules\ExitRule;
-use Hoa\Compiler\Llk\Rules\InvocationRule;
-use Hoa\Compiler\Llk\Rules\RepetitionRule;
-use Hoa\Compiler\Llk\Rules\Rule;
-use Hoa\Compiler\Llk\Rules\TokenRule;
-use Hoa\Iterator\Buffer;
+use Hamlet\Compiler;
+use Hamlet\Compiler\Exceptions\UnexpectedTokenException;
+use Hamlet\Compiler\Llk\Rules\ChoiceRule;
+use Hamlet\Compiler\Llk\Rules\ConcatenationRule;
+use Hamlet\Compiler\Llk\Rules\EntryRule;
+use Hamlet\Compiler\Llk\Rules\ExitRule;
+use Hamlet\Compiler\Llk\Rules\InvocationRule;
+use Hamlet\Compiler\Llk\Rules\RepetitionRule;
+use Hamlet\Compiler\Llk\Rules\Rule;
+use Hamlet\Compiler\Llk\Rules\TokenRule;
+use Hamlet\Iterator\Buffer;
 use RuntimeException;
 
 /**

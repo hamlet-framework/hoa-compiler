@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Visitor;
+namespace Hamlet\Compiler\Visitor;
 
 /**
  * @template E as Element

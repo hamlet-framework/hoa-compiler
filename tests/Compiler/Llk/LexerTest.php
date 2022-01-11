@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoa\Compiler\Llk;
+namespace Hamlet\Compiler\Llk;
 
 use Generator;
-use Hoa\Compiler\Exceptions\LexerException;
-use Hoa\Compiler\Exceptions\UnrecognizedTokenException;
+use Hamlet\Compiler\Exceptions\LexerException;
+use Hamlet\Compiler\Exceptions\UnrecognizedTokenException;
 use Iterator;
 use PHPUnit\Framework\TestCase;
 

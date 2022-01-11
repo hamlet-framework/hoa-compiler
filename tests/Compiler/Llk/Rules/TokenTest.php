@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
-use Hoa\Compiler\Llk\TreeNode;
-use Hoa\Compiler\Visitor\Dump;
+use Hamlet\Compiler\Llk\TreeNode;
+use Hamlet\Compiler\Visitor\Dump;
 use PHPUnit\Framework\TestCase;
 
 class TokenTest extends TestCase

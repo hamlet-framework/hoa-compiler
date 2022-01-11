@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
-use Hoa\Compiler;
-use Hoa\Compiler\Exceptions\Exception;
-use Hoa\Compiler\Llk\Llk;
-use Hoa\Compiler\Llk\Parser;
-use Hoa\Compiler\Llk\TreeNode;
+use Hamlet\Compiler;
+use Hamlet\Compiler\Exceptions\Exception;
+use Hamlet\Compiler\Llk\Llk;
+use Hamlet\Compiler\Llk\Parser;
+use Hamlet\Compiler\Llk\TreeNode;
 
 final class TokenRule extends Rule
 {

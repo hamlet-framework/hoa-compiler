@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
-use Hoa\Compiler;
+use Hamlet\Compiler;
 
 /**
  * @template C as array<Rule|InvocationRule|string>|string|int

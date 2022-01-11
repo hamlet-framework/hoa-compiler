@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Hoa\Compiler\Llk\Rules;
+namespace Hamlet\Compiler\Llk\Rules;
 
-use Hoa\Compiler;
-use Hoa\Compiler\Exceptions\Exception;
-use Hoa\Compiler\Llk\Lexer;
-use Hoa\Compiler\Llk\Token;
-use Hoa\Iterator\Lookahead;
+use Hamlet\Compiler;
+use Hamlet\Compiler\Exceptions\Exception;
+use Hamlet\Compiler\Llk\Lexer;
+use Hamlet\Compiler\Llk\Token;
+use Hamlet\Iterator\Lookahead;
 
 final class AnalyzerRule
 {
