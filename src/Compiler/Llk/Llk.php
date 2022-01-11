@@ -24,12 +24,11 @@ abstract class Llk
             throw new Exception($message, 0);
         }
 
-        [$tokens, $rawRules, $pragmas] = static::parseGrammar($grammar, $path);
+        $grammar = static::readGrammar($grammar, $path);
 
-        // @todo not sure why it cannot be (new RuleAnalyzer)->analyze($tokens, $rawRules);
-        $ruleAnalyzer = new Rules\RuleAnalyzer($tokens);
-        $rules = $ruleAnalyzer->analyzeRules($rawRules);
-        return new Parser($tokens, $rules, $pragmas);
+        $analyzer = new Rules\RuleAnalyzer($grammar);
+        $rules = $analyzer->analyzeRawRules();
+        return new Parser($grammar, $rules);
     }
 
     /**
@@ -190,19 +189,17 @@ abstract class Llk
     /**
      * Parse the grammar description language.
      *
-     * @param string $pp Grammar description.
-     * @param string $streamName The name of the stream containing the grammar.
-     * @return array{array<string,array<string,string>>,array<string,string>,array<string,string|int|bool>}
+     * @param string $grammarDescription Grammar description.
+     * @param string $grammarFileName The name of the stream containing the grammar.
+     * @return Grammar
      * @throws Exception
-     *
-     * @todo this is a testable method, also it's not really parsing, but rather preprocessing
      */
-    public static function parseGrammar(string $pp, string $streamName): array
+    public static function readGrammar(string $grammarDescription, string $grammarFileName): Grammar
     {
-        $lines = explode("\n", $pp);
+        $lines = explode("\n", $grammarDescription);
         $pragmas = [];
         $tokens = ['default' => []];
-        $rules = [];
+        $rawRules = [];
 
         for ($i = 0, $m = count($lines); $i < $m; $i++) {
             $line = rtrim($lines[$i]);
@@ -262,7 +259,7 @@ abstract class Llk
                         'Unrecognized instructions:' . "\n" .
                         '    %s' . "\n" . 'in file %s at line %d.',
                         $line,
-                        $streamName,
+                        $grammarFileName,
                         $i + 1
                     );
                     throw new Exception($message, 1);
@@ -286,10 +283,9 @@ abstract class Llk
             if (isset($lines[$i][0])) {
                 $i--;
             }
-            $rules[$ruleName] = $rule;
+            $rawRules[$ruleName] = $rule;
         }
 
-        // @todo replace with an immutable object
-        return [$tokens, $rules, $pragmas];
+        return new Grammar($tokens, $rawRules, $pragmas);
     }
 }

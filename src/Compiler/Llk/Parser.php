@@ -48,14 +48,11 @@ final class Parser
     private int $depth = -1;
 
     /**
-     * @param array<string,array<string,string>> $tokens Associative array (token name => token regex), to be defined in precedence order.
      * @param array<Rule> $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object. // @todo replace with Rules collection
-     * @param array<string,string|int|bool> $pragmas List of pragmas.
      */
     public function __construct(
-        private array $tokens = [],
-        private array $rules = [],
-        private array $pragmas = []
+        private Grammar $grammar,
+        private array $rules,
     ) {
     }
 
@@ -72,10 +69,10 @@ final class Parser
     {
         $bufferSize = 1024;
         if (isset($this->pragmas['parser.lookahead'])) {
-            $bufferSize = max(0, intval($this->pragmas['parser.lookahead']));
+            $bufferSize = max(0, intval($this->grammar->pragmas()['parser.lookahead']));
         }
-        $lexer = new Lexer($this->pragmas);
-        $tokenSequence = new Buffer($lexer->run($text, $this->tokens), $bufferSize);
+        $lexer = new Lexer($this->grammar->pragmas());
+        $tokenSequence = new Buffer($lexer->run($text, $this->grammar->tokens()), $bufferSize);
         $tokenSequence->rewind();
 
         $this->errorToken = null;
@@ -238,9 +235,9 @@ final class Parser
             $zzeRule->setNamespace($namespace);
 
             if (isset($this->tokens[$namespace][$name])) {
-                $zzeRule->setRepresentation($this->tokens[$namespace][$name]);
+                $zzeRule->setRepresentation($this->grammar->tokens()[$namespace][$name]);
             } else {
-                foreach ($this->tokens[$namespace] as $_name => $regex) {
+                foreach ($this->grammar->tokens()[$namespace] as $_name => $regex) {
                     $pos = strpos($_name, ':');
                     if ($pos === false) {
                         continue;
@@ -574,7 +571,7 @@ final class Parser
      */
     public function getPragmas(): array
     {
-        return $this->pragmas;
+        return $this->grammar->pragmas();
     }
 
     /**
@@ -583,7 +580,7 @@ final class Parser
      */
     public function getTokens(): array
     {
-        return $this->tokens;
+        return $this->grammar->tokens();
     }
 
     /**

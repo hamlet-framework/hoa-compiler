@@ -4,6 +4,7 @@ namespace Hamlet\Compiler\Llk\Rules;
 
 use Hamlet\Compiler;
 use Hamlet\Compiler\Exceptions\Exception;
+use Hamlet\Compiler\Llk\Grammar;
 use Hamlet\Compiler\Llk\Lexer;
 use Hamlet\Compiler\Llk\Token;
 use Hamlet\Iterator\Lookahead;
@@ -50,10 +51,7 @@ final class RuleAnalyzer
      */
     private RuleCounter $ruleCounter;
 
-    /**
-     * @param array<string,array<string,string>> $tokens Tokens representing rules.
-     */
-    public function __construct(private array $tokens)
+    public function __construct(private Grammar $grammar)
     {
         $this->ruleCounter = new RuleCounter;
     }
@@ -61,12 +59,13 @@ final class RuleAnalyzer
     /**
      * Build the analyzer of the rules (does not analyze the rules).
      *
-     * @param array<string,string> $rawRules Rules to be analyzed.
      * @return array<Rule>
      * @throws Exception
      */
-    public function analyzeRules(array $rawRules): array
+    public function analyzeRawRules(): array
     {
+        $rawRules = $this->grammar->rawRules();
+
         if (empty($rawRules)) {
             throw new Compiler\Exceptions\RuleException('No rules specified!', 0);
         }
@@ -408,7 +407,7 @@ final class RuleAnalyzer
             $unificationId = -1;
         }
         $exists = false;
-        foreach ($this->tokens as $tokens) {
+        foreach ($this->grammar->tokens() as $tokens) {
             foreach ($tokens as $token => $_) {
                 if ($token == $tokenName || str_starts_with($token, $tokenName . ':')) {
                     $exists = true;

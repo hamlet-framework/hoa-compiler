@@ -17,7 +17,7 @@ class LlkTest extends TestCase
               '%skip  sourceNS1:foobar5  bazqux5' . "\n" .
               '%skip  sourceNS2:foobar6  bazqux6' . "\n";
 
-        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
+        $grammar = Llk::readGrammar($pp, 'streamFoo');
 
         $this->assertEquals([
             'default' => [
@@ -29,9 +29,9 @@ class LlkTest extends TestCase
             'sourceNS2' => [
                 'skip' => 'bazqux6'
             ]
-        ], $tokens);
-        $this->assertEmpty($rules);
-        $this->assertEmpty($pragmas);
+        ], $grammar->tokens());
+        $this->assertEmpty($grammar->rawRules());
+        $this->assertEmpty($grammar->pragmas());
     }
 
     public function test_parse_tokens(): void
@@ -40,7 +40,7 @@ class LlkTest extends TestCase
               '%token  sourceNS1:foobar2  bazqux2' . "\n" .
               '%token  sourceNS2:foobar3  bazqux3  -> destinationNS' . "\n" .
               '%token  foobar4            barqux4  -> destinationNS';
-        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
+        $grammar = Llk::readGrammar($pp, 'streamFoo');
 
         $this->assertEquals([
             'default' => [
@@ -53,9 +53,9 @@ class LlkTest extends TestCase
             'sourceNS2' => [
                 'foobar3:destinationNS' => 'bazqux3'
             ]
-        ], $tokens);
-        $this->assertEmpty($rules);
-        $this->assertEmpty($pragmas);
+        ], $grammar->tokens());
+        $this->assertEmpty($grammar->rawRules());
+        $this->assertEmpty($grammar->pragmas());
     }
 
     public function test_parse_pragmas(): void
@@ -65,17 +65,17 @@ class LlkTest extends TestCase
               '%pragma  numby   42' . "\n" .
               '%pragma  foobar  hello' . "\n" .
               '%pragma  bazqux  "world!"  ' . "\n";
-        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
+        $grammar = Llk::readGrammar($pp, 'streamFoo');
 
-        $this->assertEquals(['default' => []], $tokens);
-        $this->assertEmpty($rules);
+        $this->assertEquals(['default' => []], $grammar->tokens());
+        $this->assertEmpty($grammar->rawRules());
         $this->assertEquals([
             'truly'  => true,
             'falsy'  => false,
             'numby'  => 42,
             'foobar' => 'hello',
             'bazqux' => '"world!"'
-        ], $pragmas);
+        ], $grammar->pragmas());
     }
 
     public function test_unrecognized_instructions(): void
@@ -89,7 +89,7 @@ class LlkTest extends TestCase
             '    %foobar baz qux' . "\n" .
             'in file streamFoo at line 2.'
         );
-        Llk::parseGrammar($pp, 'streamFoo');
+        Llk::readGrammar($pp, 'streamFoo');
     }
 
     public function test_parse_rules(): void
@@ -102,26 +102,26 @@ class LlkTest extends TestCase
               "\t" . 'single tab' . "\n" .
               'ruleC:' . "\n" .
               "\t\t" . 'many tabs' . "\n";
-        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
+        $grammar = Llk::readGrammar($pp, 'streamFoo');
 
-        $this->assertEquals(['default' => []], $tokens);
+        $this->assertEquals(['default' => []], $grammar->tokens());
         $this->assertEquals([
             'ruleA' => ' single space single space',
             'ruleB' => ' many spaces single tab',
             'ruleC' => ' many tabs'
-        ], $rules);
-        $this->assertEmpty($pragmas);
+        ], $grammar->rawRules());
+        $this->assertEmpty($grammar->pragmas());
     }
 
     public function test_parse_skip_comments(): void
     {
         $pp = '// Hello,' . "\n" .
               '//   World!';
-        [$tokens, $rules, $pragmas] = Llk::parseGrammar($pp, 'streamFoo');
+        $grammar = Llk::readGrammar($pp, 'streamFoo');
 
-        $this->assertEquals(['default' => []], $tokens);
-        $this->assertEmpty($rules);
-        $this->assertEmpty($pragmas);
+        $this->assertEquals(['default' => []], $grammar->tokens());
+        $this->assertEmpty($grammar->rawRules());
+        $this->assertEmpty($grammar->pragmas());
     }
 
     public function test_load_empty(): void
