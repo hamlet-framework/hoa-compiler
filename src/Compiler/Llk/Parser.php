@@ -191,6 +191,7 @@ final class Parser
      */
     private function _parse(Buffer $tokenSequence, Rule $currentRule, string|int $nextRuleIndex): bool
     {
+        // @todo this is a set of polymorphic calls, can be done more elegantly at one point
         if ($currentRule instanceof TokenRule) {
             $name = $tokenSequence->current()->token;
 
@@ -205,15 +206,13 @@ final class Parser
                     $trace = $this->trace[$i];
 
                     if ($trace instanceof EntryRule) {
-                        if (false === $trace->isTransitional()) {
+                        if (!$trace->isTransitional()) {
                             if ($trace->getDepth() <= $this->depth) {
                                 break;
                             }
-
-                            --$skip;
+                            $skip--;
                         }
-                    } elseif ($trace instanceof ExitRule &&
-                        false === $trace->isTransitional()) {
+                    } elseif ($trace instanceof ExitRule && !$trace->isTransitional()) {
                         $skip += (int)($trace->getDepth() > $this->depth);
                     }
 
@@ -490,6 +489,8 @@ final class Parser
      * @param string $cId Node ID.
      * @param bool $recursive Whether we should merge recursively or not.
      * @return bool
+     *
+     * @todo move into TreeNode
      */
     private function mergeTree(array &$children, array $handle, string $cId, bool $recursive): bool
     {
@@ -521,6 +522,8 @@ final class Parser
      * @param TreeNode $node Node that receives.
      * @param TreeNode $newNode Node to merge.
      * @return void
+     *
+     * @todo move into TreeNode
      */
     private function mergeTreeRecursive(TreeNode $node, TreeNode $newNode): void
     {

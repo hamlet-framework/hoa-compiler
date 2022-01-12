@@ -188,6 +188,7 @@ abstract class Llk
 
     /**
      * Parse the grammar description language.
+     * Extract grammar reader into a separate file
      *
      * @param string $grammarDescription Grammar description.
      * @param string $grammarFileName The name of the stream containing the grammar.
@@ -237,11 +238,7 @@ abstract class Llk
                     if (!isset($tokens[$matches[1]]['skip'])) {
                         $tokens[$matches[1]]['skip'] = $matches[3];
                     } else {
-                        $tokens[$matches[1]]['skip'] =
-                            '(?:' .
-                            $tokens[$matches[1]]['skip'] . '|' .
-                            $matches[3] .
-                            ')';
+                        $tokens[$matches[1]]['skip'] = '(?:' . $tokens[$matches[1]]['skip'] . '|' . $matches[3] . ')';
                     }
                 } elseif (preg_match('#^%token\h+(?:([^:]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches) !== 0) {
                     if (empty($matches[1])) {
