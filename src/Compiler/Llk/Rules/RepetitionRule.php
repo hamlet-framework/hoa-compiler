@@ -5,7 +5,7 @@ namespace Hamlet\Compiler\Llk\Rules;
 use Hamlet\Compiler;
 
 /**
- * @template C as array<Rule|InvocationRule|string>|string|int
+ * @template C as array<Rule|Invocation|string>|string|int
  * @extends Rule<C>
  */
 class RepetitionRule extends Rule

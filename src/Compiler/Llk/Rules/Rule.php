@@ -3,7 +3,7 @@
 namespace Hamlet\Compiler\Llk\Rules;
 
 /**
- * @template C as array<Rule|InvocationRule|int|string>|int|string|null
+ * @template C as array<Rule|Invocation|int|string>|int|string|null
  */
 abstract class Rule
 {

@@ -2,6 +2,6 @@
 
 namespace Hamlet\Compiler\Llk\Rules;
 
-class ExitRule extends InvocationRule
+class EntryInvocation extends Invocation
 {
 }

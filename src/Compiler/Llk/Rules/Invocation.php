@@ -2,7 +2,7 @@
 
 namespace Hamlet\Compiler\Llk\Rules;
 
-abstract class InvocationRule
+abstract class Invocation
 {
     /**
      * Whether the rule is transitional or not (i.e. not declared in the grammar but created by the analyzer).
@@ -12,7 +12,7 @@ abstract class InvocationRule
     /**
      * @param int|string $name
      * @param int|string $data
-     * @param array<InvocationRule> $todo Piece of todo sequence.
+     * @param array<Invocation> $todo Piece of todo sequence.
      * @param int $depth Depth in the trace.
      */
     public function __construct(
@@ -36,7 +36,7 @@ abstract class InvocationRule
 
     /**
      * Get todo sequence.
-     * @return array<InvocationRule>
+     * @return array<Invocation>
      */
     public function getTodo(): array
     {

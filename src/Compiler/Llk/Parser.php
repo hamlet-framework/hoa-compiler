@@ -6,9 +6,9 @@ use Hamlet\Compiler;
 use Hamlet\Compiler\Exceptions\UnexpectedTokenException;
 use Hamlet\Compiler\Llk\Rules\ChoiceRule;
 use Hamlet\Compiler\Llk\Rules\ConcatenationRule;
-use Hamlet\Compiler\Llk\Rules\EntryRule;
-use Hamlet\Compiler\Llk\Rules\ExitRule;
-use Hamlet\Compiler\Llk\Rules\InvocationRule;
+use Hamlet\Compiler\Llk\Rules\EntryInvocation;
+use Hamlet\Compiler\Llk\Rules\ExitInvocation;
+use Hamlet\Compiler\Llk\Rules\Invocation;
 use Hamlet\Compiler\Llk\Rules\RepetitionRule;
 use Hamlet\Compiler\Llk\Rules\Rule;
 use Hamlet\Compiler\Llk\Rules\TokenRule;
@@ -27,13 +27,13 @@ final class Parser
 
     /**
      * Trace of activated rules.
-     * @var array<InvocationRule|Rule>
+     * @var array<Invocation|Rule>
      */
     private array $trace = [];
 
     /**
      * Stack of todo list.
-     * @var array<InvocationRule>
+     * @var array<Invocation>
      */
     private array $todo = [];
 
@@ -82,8 +82,8 @@ final class Parser
             $axiomRule = $this->getRootRule();
         }
 
-        $closeRule = new ExitRule($axiomRule, 0);
-        $openRule = new EntryRule($axiomRule, 0, [$closeRule]);
+        $closeRule = new ExitInvocation($axiomRule, 0);
+        $openRule = new EntryInvocation($axiomRule, 0, [$closeRule]);
         $this->todo = [$closeRule, $openRule];
 
         do {
@@ -160,7 +160,7 @@ final class Parser
     {
         while ($this->todo) {
             $rule = array_pop($this->todo);
-            if ($rule instanceof ExitRule) {
+            if ($rule instanceof ExitInvocation) {
                 $rule->setDepth($this->depth);
                 $this->trace[] = $rule;
                 if (!$rule->isTransitional()) {
@@ -205,14 +205,14 @@ final class Parser
                 for ($skip = 0, $i = count($this->trace) - 1; $i >= 0; --$i) {
                     $trace = $this->trace[$i];
 
-                    if ($trace instanceof EntryRule) {
+                    if ($trace instanceof EntryInvocation) {
                         if (!$trace->isTransitional()) {
                             if ($trace->getDepth() <= $this->depth) {
                                 break;
                             }
                             $skip--;
                         }
-                    } elseif ($trace instanceof ExitRule && !$trace->isTransitional()) {
+                    } elseif ($trace instanceof ExitInvocation && !$trace->isTransitional()) {
                         $skip += (int)($trace->getDepth() > $this->depth);
                     }
 
@@ -261,15 +261,15 @@ final class Parser
                 ++$this->depth;
             }
 
-            $this->trace[] = new EntryRule($currentRule->getName(), 0, [], $this->depth);
+            $this->trace[] = new EntryInvocation($currentRule->getName(), 0, [], $this->depth);
             $children = $currentRule->getChildren();
 
             assert(is_array($children));
             for ($i = count($children) - 1; $i >= 0; --$i) {
                 $nextRule = $children[$i];
                 assert(is_string($nextRule) || is_int($nextRule));
-                $this->todo[] = new ExitRule($nextRule, 0);
-                $this->todo[] = new EntryRule($nextRule, 0);
+                $this->todo[] = new ExitInvocation($nextRule, 0);
+                $this->todo[] = new EntryInvocation($nextRule, 0);
             }
 
             return true;
@@ -282,11 +282,11 @@ final class Parser
             if (!$currentRule->isTransitional()) {
                 ++$this->depth;
             }
-            $this->trace[] = new EntryRule($currentRule->getName(), $nextRuleIndex, $this->todo, $this->depth);
+            $this->trace[] = new EntryInvocation($currentRule->getName(), $nextRuleIndex, $this->todo, $this->depth);
             $nextRule = $children[$nextRuleIndex];
             assert(is_string($nextRule) || is_int($nextRule));
-            $this->todo[] = new ExitRule($nextRule, 0);
-            $this->todo[] = new EntryRule($nextRule, 0);
+            $this->todo[] = new ExitInvocation($nextRule, 0);
+            $this->todo[] = new EntryInvocation($nextRule, 0);
 
             return true;
         } elseif ($currentRule instanceof RepetitionRule) {
@@ -298,23 +298,23 @@ final class Parser
                 if (!$currentRule->isTransitional()) {
                     ++$this->depth;
                 }
-                $this->trace[] = new EntryRule($name, $min, [], $this->depth);
+                $this->trace[] = new EntryInvocation($name, $min, [], $this->depth);
                 array_pop($this->todo);
-                $this->todo[] = new ExitRule($name, $min, $this->todo);
+                $this->todo[] = new ExitInvocation($name, $min, $this->todo);
                 for ($i = 0; $i < $min; ++$i) {
                     assert(is_string($nextRule) || is_int($nextRule));
-                    $this->todo[] = new ExitRule($nextRule, 0);
-                    $this->todo[] = new EntryRule($nextRule, 0);
+                    $this->todo[] = new ExitInvocation($nextRule, 0);
+                    $this->todo[] = new EntryInvocation($nextRule, 0);
                 }
             } else {
                 $max = $currentRule->getMax();
                 if ($max != -1 && $max < $nextRuleIndex) {
                     return false;
                 }
-                $this->todo[] = new ExitRule($currentRule->getName(), $nextRuleIndex, $this->todo);
+                $this->todo[] = new ExitInvocation($currentRule->getName(), $nextRuleIndex, $this->todo);
                 assert(is_string($nextRule) || is_int($nextRule));
-                $this->todo[] = new ExitRule($nextRule, 0);
-                $this->todo[] = new EntryRule($nextRule, 0);
+                $this->todo[] = new ExitInvocation($nextRule, 0);
+                $this->todo[] = new EntryInvocation($nextRule, 0);
             }
             return true;
         }
@@ -333,10 +333,10 @@ final class Parser
 
         do {
             $last = array_pop($this->trace);
-            if ($last instanceof EntryRule) {
+            if ($last instanceof EntryInvocation) {
                 $zeRule = $this->rules[$last->getName()];
                 $found = $zeRule instanceof ChoiceRule;
-            } elseif ($last instanceof ExitRule) {
+            } elseif ($last instanceof ExitInvocation) {
                 $zeRule = $this->rules[$last->getName()];
                 $found = $zeRule instanceof RepetitionRule;
             } elseif ($last instanceof TokenRule) {
@@ -351,12 +351,12 @@ final class Parser
             return false;
         }
 
-        assert($last instanceof InvocationRule);
+        assert($last instanceof Invocation);
         $rule = $last->getName();
         $next = ((int) $last->getData()) + 1;
         $this->depth = $last->getDepth();
         $this->todo = $last->getTodo();
-        $this->todo[] = new EntryRule($rule, $next);
+        $this->todo[] = new EntryInvocation($rule, $next);
 
         return true;
     }
@@ -381,7 +381,7 @@ final class Parser
             assert(is_int($i));
             $trace = $this->trace[$i];
 
-            if ($trace instanceof EntryRule) {
+            if ($trace instanceof EntryInvocation) {
                 $ruleName = $trace->getName();
                 $rule = $this->rules[$ruleName];
                 $isRule = !$trace->isTransitional();
@@ -389,7 +389,7 @@ final class Parser
                 $id = $rule->getNodeId();
 
                 // Optimization: Skip empty trace sequence.
-                if ($nextTrace instanceof ExitRule && $nextTrace->getName() == $ruleName) {
+                if ($nextTrace instanceof ExitInvocation && $nextTrace->getName() == $ruleName) {
                     $i += 2;
                     continue;
                 }
@@ -457,7 +457,7 @@ final class Parser
                 }
 
                 $children[] = $cTree;
-            } elseif ($trace instanceof ExitRule) {
+            } elseif ($trace instanceof ExitInvocation) {
                 return $i + 1;
             } elseif ($trace instanceof TokenRule) {
                 if (!$trace->isKept()) {

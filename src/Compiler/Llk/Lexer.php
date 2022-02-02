@@ -6,7 +6,6 @@ use Generator;
 use Hamlet\Compiler;
 use Hamlet\Compiler\Exceptions\LexerException;
 use Hamlet\Compiler\Exceptions\UnrecognizedTokenException;
-use SplStack;
 
 class Lexer
 {
@@ -27,9 +26,9 @@ class Lexer
 
     /**
      * Namespace stack.
-     * @var ?SplStack<string>
+     * @var ?array<string>
      */
-    protected ?SplStack $namespaceStack = null;
+    protected ?array $namespaceStack = null;
 
     /**
      * PCRE options.
@@ -65,6 +64,7 @@ class Lexer
         $this->lexerState = 'default';
         $stack = false;
 
+        // @todo, this is rather ugly, replacing by reference
         foreach ($this->tokens as &$tokens) {
             $_tokens = [];
             foreach ($tokens as $fullLexeme => $regex) {
@@ -81,10 +81,7 @@ class Lexer
         }
 
         if ($stack) {
-            /**
-             * @psalm-suppress MixedPropertyTypeCoercion
-             */
-            $this->namespaceStack = new SplStack;
+            $this->namespaceStack = [];
         }
 
         while ($offset < $maxOffset) {
@@ -152,7 +149,7 @@ class Lexer
 
                     $previousNamespace = null;
                     while (1 <= $i--) {
-                        $previousNamespace = $this->namespaceStack->pop();
+                        $previousNamespace = array_pop($this->namespaceStack);
                     }
 
                     $nextState = $previousNamespace;
@@ -166,7 +163,7 @@ class Lexer
                 }
 
                 if ($this->namespaceStack !== null && !$shift) {
-                    $this->namespaceStack->push($this->lexerState);
+                    $this->namespaceStack[] = $this->lexerState;
                 }
 
                 $this->lexerState = $nextState;

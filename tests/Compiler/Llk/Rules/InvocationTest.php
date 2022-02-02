@@ -10,7 +10,7 @@ class InvocationTest extends TestCase
     {
         $rule = 'foo';
         $data = 'bar';
-        $invocation = new class($rule, $data) extends InvocationRule {
+        $invocation = new class($rule, $data) extends Invocation {
         };
 
         $this->assertEquals($rule, $invocation->getName());
@@ -25,7 +25,7 @@ class InvocationTest extends TestCase
         $rule = 'foo';
         $data = 'bar';
         $todo = ['baz', 'qux'];
-        $invocation = new class($rule, $data, $todo) extends InvocationRule {
+        $invocation = new class($rule, $data, $todo) extends Invocation {
         };
 
         $this->assertEquals($rule, $invocation->getName());
@@ -41,7 +41,7 @@ class InvocationTest extends TestCase
         $data = 'bar';
         $todo = ['baz', 'qux'];
         $depth = 42;
-        $invocation = new class($rule, $data, $todo, $depth) extends InvocationRule {
+        $invocation = new class($rule, $data, $todo, $depth) extends Invocation {
         };
 
         $this->assertEquals($rule, $invocation->getName());
@@ -56,7 +56,7 @@ class InvocationTest extends TestCase
         $rule = 42;
         $data = 'bar';
         $depth = 42;
-        $invocation = new class($rule, $data) extends InvocationRule {
+        $invocation = new class($rule, $data) extends Invocation {
         };
 
         $this->assertEquals(-1, $invocation->getDepth());
@@ -68,7 +68,7 @@ class InvocationTest extends TestCase
     {
         $rule = 7;
         $data = 'bar';
-        $invocation = new class($rule, $data) extends InvocationRule {
+        $invocation = new class($rule, $data) extends Invocation {
         };
 
         $this->assertTrue($invocation->isTransitional());
@@ -78,7 +78,7 @@ class InvocationTest extends TestCase
     {
         $rule = 'a';
         $data = 'bar';
-        $invocation = new class($rule, $data) extends InvocationRule {
+        $invocation = new class($rule, $data) extends Invocation {
         };
 
         $this->assertFalse($invocation->isTransitional());
