@@ -41,12 +41,6 @@ final class RuleAnalyzer
     private string|int|null $ruleName = null;
 
     /**
-     * Parsed rules.
-     * @var array<Rule>
-     */
-    protected array $parsedRules = [];
-
-    /**
      * Counter to auto-name transitional rules.
      */
     private RuleCounter $ruleCounter;
@@ -58,10 +52,7 @@ final class RuleAnalyzer
 
     /**
      * Build the analyzer of the rules (does not analyze the rules).
-     *
      * @return Rules
-     * @throws Exception
-     * @todo use Rules class
      */
     public function analyzeRawRules(): Rules
     {
@@ -71,10 +62,7 @@ final class RuleAnalyzer
             throw new Compiler\Exceptions\RuleException('No rules specified!', 0);
         }
 
-        /**
-         * @var array<int|string,Rule>
-         */
-        $this->parsedRules = [];
+        $parsedRules = Rules::createEmpty();
         $lexer = new Lexer();
 
         foreach ($rawRules as $ruleName => $ruleBody) {
@@ -90,14 +78,14 @@ final class RuleAnalyzer
             }
 
             $pNodeId = $nodeId;
-            $rule = $this->rule($ruleTokens, $rawRules, $pNodeId);
+            $rule = $this->rule($ruleTokens, $rawRules, $parsedRules, $pNodeId);
 
             if ($rule === null) {
                 $message = sprintf('Error while parsing rule %s.', $ruleName);
                 throw new Exception($message, 1);
             }
 
-            $zeRule = $this->parsedRules[$rule];
+            $zeRule = $parsedRules->get($rule);
             $zeRule->setName($ruleName);
             $zeRule->setPPRepresentation($ruleBody);
 
@@ -105,49 +93,48 @@ final class RuleAnalyzer
                 $zeRule->setDefaultId($nodeId);
             }
 
-            unset($this->parsedRules[$rule]);
-            $this->parsedRules[$ruleName] = $zeRule;
+            $parsedRules->remove($rule);
+            $parsedRules->set($ruleName, $zeRule);
         }
 
-        /**
-         * @psalm-suppress MixedArgumentTypeCoercion
-         */
-        return new Rules($this->parsedRules);
+        return $parsedRules;
     }
 
     /**
      * Implementation of “rule”.
      * @param Lookahead<mixed,Token> $ruleTokens
      * @param array<string,string> $rules
+     * @param Rules $parsedRules
      * @param string|null $pNodeId
      * @return string|int|null
      */
-    private function rule(Lookahead $ruleTokens, array $rules, ?string &$pNodeId): string|int|null
+    private function rule(Lookahead $ruleTokens, array $rules, Rules $parsedRules, ?string &$pNodeId): string|int|null
     {
-        return $this->choice($ruleTokens, $rules, $pNodeId);
+        return $this->choice($ruleTokens, $rules, $parsedRules, $pNodeId);
     }
 
     /**
      * Implementation of “choice”.
      * @param Lookahead<mixed,Token> $ruleTokens
      * @param array<string,string> $rawRules
+     * @param Rules $parsedRules
      * @param ?string $pNodeId
      * @return string|int|null
      */
-    private function choice(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
+    private function choice(Lookahead $ruleTokens, array $rawRules, Rules $parsedRules, ?string &$pNodeId): string|int|null
     {
         $children = [];
 
         // concatenation() …
         $nNodeId = $pNodeId;
-        $rule = $this->concatenation($ruleTokens, $rawRules, $nNodeId);
+        $rule = $this->concatenation($ruleTokens, $rawRules, $parsedRules, $nNodeId);
 
         if ($rule === null) {
             return null;
         }
 
         if ($nNodeId !== null) { // && $this->_parsedRules
-            $this->parsedRules[$rule]->setNodeId($nNodeId);
+            $parsedRules->get($rule)->setNodeId($nNodeId);
         }
 
         $children[] = $rule;
@@ -158,14 +145,14 @@ final class RuleAnalyzer
             $ruleTokens->next();
             $others = true;
             $nNodeId = $pNodeId;
-            $rule = $this->concatenation($ruleTokens, $rawRules, $nNodeId);
+            $rule = $this->concatenation($ruleTokens, $rawRules, $parsedRules, $nNodeId);
 
             if ($rule === null) {
                 return null;
             }
 
             if ($nNodeId !== null) {
-                $this->parsedRules[$rule]->setNodeId($nNodeId);
+                $parsedRules->get($rule)->setNodeId($nNodeId);
             }
 
             $children[] = $rule;
@@ -178,7 +165,7 @@ final class RuleAnalyzer
         }
 
         $name = $this->ruleCounter->next();
-        $this->parsedRules[$name] = new ChoiceRule($name, $children);
+        $parsedRules->set($name, new ChoiceRule($name, $children));
 
         return $name;
     }
@@ -187,15 +174,16 @@ final class RuleAnalyzer
      * Implementation of “concatenation”.
      * @param Lookahead<mixed,Token> $ruleTokens
      * @param array<string,string> $rawRules
+     * @param Rules $parsedRules
      * @param string|null $pNodeId
      * @return string|int|null
      */
-    private function concatenation(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
+    private function concatenation(Lookahead $ruleTokens, array $rawRules, Rules $parsedRules, ?string &$pNodeId): string|int|null
     {
         $children = [];
 
         // repetition() …
-        $rule = $this->repetition($ruleTokens, $rawRules, $pNodeId);
+        $rule = $this->repetition($ruleTokens, $rawRules, $parsedRules, $pNodeId);
 
         if ($rule === null) {
             return null;
@@ -205,7 +193,7 @@ final class RuleAnalyzer
         $others = false;
 
         // … repetition()*
-        while (($r1 = $this->repetition($ruleTokens, $rawRules, $pNodeId)) !== null) {
+        while (($r1 = $this->repetition($ruleTokens, $rawRules, $parsedRules, $pNodeId)) !== null) {
             $children[] = $r1;
             $others = true;
         }
@@ -215,7 +203,7 @@ final class RuleAnalyzer
         }
 
         $name = $this->ruleCounter->next();
-        $this->parsedRules[$name] = new ConcatenationRule($name, $children);
+        $parsedRules->set($name, new ConcatenationRule($name, $children));
 
         return $name;
     }
@@ -224,13 +212,14 @@ final class RuleAnalyzer
      * Implementation of “repetition”.
      * @param Lookahead<mixed,Token> $ruleTokens
      * @param array<string,string> $rawRules
+     * @param Rules $parsedRules
      * @param string|null $pNodeId
      * @return string|int|null
      */
-    private function repetition(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
+    private function repetition(Lookahead $ruleTokens, array $rawRules, Rules $parsedRules, ?string &$pNodeId): string|int|null
     {
         // simple() …
-        $children = $this->simple($ruleTokens, $rawRules, $pNodeId);
+        $children = $this->simple($ruleTokens, $rawRules, $parsedRules, $pNodeId);
 
         if ($children === null) {
             return null;
@@ -309,7 +298,11 @@ final class RuleAnalyzer
         }
 
         $name = $this->ruleCounter->next();
-        $this->parsedRules[$name] = new RepetitionRule($name, $min, $max, $children, null);
+        /**
+         * @psalm-suppress InvalidArgument
+         * @todo not sure what this is about
+         */
+        $parsedRules->set($name, new RepetitionRule($name, $min, $max, $children, null));
 
         return $name;
     }
@@ -318,14 +311,15 @@ final class RuleAnalyzer
      * Implementation of “simple”.
      * @param Lookahead<mixed,Token> $ruleTokens
      * @param array<string,string> $rawRules
+     * @param Rules $parsedRules
      * @param string|null $pNodeId
      * @return int|string|null
      */
-    private function simple(Lookahead $ruleTokens, array $rawRules, ?string &$pNodeId): string|int|null
+    private function simple(Lookahead $ruleTokens, array $rawRules, Rules $parsedRules, ?string &$pNodeId): string|int|null
     {
         if ($ruleTokens->current()->token === 'capturing_') {
             $ruleTokens->next();
-            $rule = $this->choice($ruleTokens, $rawRules, $pNodeId);
+            $rule = $this->choice($ruleTokens, $rawRules, $parsedRules, $pNodeId);
 
             if ($rule === null) {
                 return null;
@@ -349,7 +343,7 @@ final class RuleAnalyzer
 
             $name = $this->ruleCounter->next();
             $tokenRule = new TokenRule((string)$name, $tokenName, null, $unificationId, false);
-            $this->parsedRules[$name] = $tokenRule;
+            $parsedRules->set($name, $tokenRule);
             $ruleTokens->next();
 
             return $name;
@@ -365,7 +359,7 @@ final class RuleAnalyzer
 
             $name = $this->ruleCounter->next();
             $tokenRule = new TokenRule($name, $tokenName, null, $unificationId, true);
-            $this->parsedRules[$name] = $tokenRule;
+            $parsedRules->set($name, $tokenRule);
             $ruleTokens->next();
 
             return $name;
@@ -380,7 +374,7 @@ final class RuleAnalyzer
 
             if ($ruleTokens->key() === 0 && $ruleTokens->getNext()->token === 'EOF') {
                 $name = $this->ruleCounter->next();
-                $this->parsedRules[$name] = new ConcatenationRule($name, [$tokenName], null);
+                $parsedRules->set($name, new ConcatenationRule($name, [$tokenName], null));
             } else {
                 $name = $tokenName;
             }

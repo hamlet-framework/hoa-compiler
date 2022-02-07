@@ -47,8 +47,6 @@ class Lexer
 
     /**
      * Text tokenizer: splits the text in parameter in an ordered array of tokens.
-     *
-     * @todo replace array{token:string,value:string,length:int,namespace:string,keep:bool,offset:int} with token
      * @param string $text Text to tokenize.
      * @param array<string,array<string,string>> $tokens Tokens to be returned.
      * @return Generator<Token>

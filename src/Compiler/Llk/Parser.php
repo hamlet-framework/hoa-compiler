@@ -48,9 +48,6 @@ final class Parser
      */
     private int $depth = -1;
 
-    /**
-     * @param Rules $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object. // @todo replace with Rules collection
-     */
     public function __construct(
         private Grammar $grammar,
         private Rules $rules,
