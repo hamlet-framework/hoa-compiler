@@ -11,6 +11,7 @@ use Hamlet\Compiler\Llk\Rules\ExitInvocation;
 use Hamlet\Compiler\Llk\Rules\Invocation;
 use Hamlet\Compiler\Llk\Rules\RepetitionRule;
 use Hamlet\Compiler\Llk\Rules\Rule;
+use Hamlet\Compiler\Llk\Rules\Rules;
 use Hamlet\Compiler\Llk\Rules\TokenRule;
 use Hamlet\Iterator\Buffer;
 use RuntimeException;
@@ -48,11 +49,11 @@ final class Parser
     private int $depth = -1;
 
     /**
-     * @param array<Rule> $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object. // @todo replace with Rules collection
+     * @param Rules $rules Rules, to be defined as associative array, name(which can be numerical) => Rule object. // @todo replace with Rules collection
      */
     public function __construct(
         private Grammar $grammar,
-        private array $rules,
+        private Rules $rules,
     ) {
     }
 
@@ -78,7 +79,7 @@ final class Parser
         $this->errorToken = null;
         $this->trace = [];
 
-        if ($axiomRule === null || !array_key_exists($axiomRule, $this->rules)) {
+        if ($axiomRule === null || !$this->rules->contains($axiomRule)) {
             $axiomRule = $this->getRootRule();
         }
 
@@ -112,18 +113,18 @@ final class Parser
 
                 if (!empty($text)) {
                     if (0 === $offset) {
-                        $leftnl = 0;
+                        $leftNewLine = 0;
                     } else {
-                        $leftnl = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
+                        $leftNewLine = strrpos($text, "\n", -(strlen($text) - $offset) - 1) ?: 0;
                     }
 
                     // assert($offset !== null);
-                    $rightnl = strpos($text, "\n", $offset);
-                    $line = substr_count($text, "\n", 0, $leftnl + 1) + 1;
-                    $column = $offset - $leftnl + (0 === $leftnl ? 1 : 0);
+                    $rightNewLine = strpos($text, "\n", $offset);
+                    $line = substr_count($text, "\n", 0, $leftNewLine + 1) + 1;
+                    $column = $offset - $leftNewLine + (0 === $leftNewLine ? 1 : 0);
 
-                    if (false !== $rightnl) {
-                        $text = trim(substr($text, $leftnl, $rightnl - $leftnl), "\n");
+                    if (false !== $rightNewLine) {
+                        $text = trim(substr($text, $leftNewLine, $rightNewLine - $leftNewLine), "\n");
                     }
                 }
 
@@ -169,10 +170,7 @@ final class Parser
             } else {
                 $ruleName = $rule->getName();
                 $next = $rule->getData();
-                $zeRule = $this->rules[$ruleName];
-                /**
-                 * @psalm-suppress MixedArgumentTypeCoercion
-                 */
+                $zeRule = $this->rules->get($ruleName);
                 $out = $this->_parse($tokenSequence, $zeRule, $next);
                 if (!$out && !$this->backtrack($tokenSequence)) {
                     return false;
@@ -334,10 +332,10 @@ final class Parser
         do {
             $last = array_pop($this->trace);
             if ($last instanceof EntryInvocation) {
-                $zeRule = $this->rules[$last->getName()];
+                $zeRule = $this->rules->get($last->getName());
                 $found = $zeRule instanceof ChoiceRule;
             } elseif ($last instanceof ExitInvocation) {
-                $zeRule = $this->rules[$last->getName()];
+                $zeRule = $this->rules->get($last->getName());
                 $found = $zeRule instanceof RepetitionRule;
             } elseif ($last instanceof TokenRule) {
                 $tokenSequence->previous();
@@ -383,7 +381,7 @@ final class Parser
 
             if ($trace instanceof EntryInvocation) {
                 $ruleName = $trace->getName();
-                $rule = $this->rules[$ruleName];
+                $rule = $this->rules->get($ruleName);
                 $isRule = !$trace->isTransitional();
                 $nextTrace = $this->trace[$i + 1];
                 $id = $rule->getNodeId();
@@ -570,7 +568,7 @@ final class Parser
 
     /**
      * Get pragmas.
-     * @return array<string,string|int|bool>
+     * @psalm-return array<string,string|int|bool>
      */
     public function getPragmas(): array
     {
@@ -591,14 +589,13 @@ final class Parser
      */
     public function getRule(string|int $name): ?Rule
     {
-        return $this->rules[$name] ?? null;
+        if (!$this->rules->contains($name)) {
+            return null;
+        }
+        return $this->rules->get($name);
     }
 
-    /**
-     * Get rules.
-     * @return array<Rule>
-     */
-    public function getRules(): array
+    public function getRules(): Rules
     {
         return $this->rules;
     }
@@ -608,11 +605,6 @@ final class Parser
      */
     public function getRootRule(): int|string
     {
-        foreach ($this->rules as $rule => $_) {
-            if (!is_int($rule)) {
-                return $rule;
-            }
-        }
-        throw new RuntimeException('Should never happen');
+        return $this->rules->root();
     }
 }

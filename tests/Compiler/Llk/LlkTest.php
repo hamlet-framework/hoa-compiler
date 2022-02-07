@@ -148,7 +148,7 @@ class LlkTest extends TestCase
         ], $parser->getTokens());
         $this->assertEquals([
             'ruleA' => $ruleA
-        ], $parser->getRules());
+        ], iterator_to_array($parser->getRules()->iterator()));
     }
 
     public function test_save()

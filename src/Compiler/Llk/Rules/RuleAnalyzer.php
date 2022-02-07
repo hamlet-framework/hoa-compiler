@@ -59,10 +59,11 @@ final class RuleAnalyzer
     /**
      * Build the analyzer of the rules (does not analyze the rules).
      *
-     * @return array<Rule>
+     * @return Rules
      * @throws Exception
+     * @todo use Rules class
      */
-    public function analyzeRawRules(): array
+    public function analyzeRawRules(): Rules
     {
         $rawRules = $this->grammar->rawRules();
 
@@ -71,7 +72,7 @@ final class RuleAnalyzer
         }
 
         /**
-         * @var array<Rule>
+         * @var array<int|string,Rule>
          */
         $this->parsedRules = [];
         $lexer = new Lexer();
@@ -108,7 +109,10 @@ final class RuleAnalyzer
             $this->parsedRules[$ruleName] = $zeRule;
         }
 
-        return $this->parsedRules;
+        /**
+         * @psalm-suppress MixedArgumentTypeCoercion
+         */
+        return new Rules($this->parsedRules);
     }
 
     /**

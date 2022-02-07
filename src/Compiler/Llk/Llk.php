@@ -72,7 +72,7 @@ abstract class Llk
             $outTokens .= '                ],' . "\n";
         }
 
-        foreach ($parser->getRules() as $rule) {
+        foreach ($parser->getRules()->iterator() as $rule) {
             $arguments = [];
 
             // Name.
