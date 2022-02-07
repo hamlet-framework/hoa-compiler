@@ -7,6 +7,9 @@ use Hamlet\Compiler;
 use Hamlet\Compiler\Exceptions\LexerException;
 use Hamlet\Compiler\Exceptions\UnrecognizedTokenException;
 
+/**
+ * @todo refactor and cover with tests
+ */
 class Lexer
 {
     /**
