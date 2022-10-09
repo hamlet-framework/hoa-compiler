@@ -34,8 +34,8 @@
 // Grammar \Hoa\Regex\Grammar.
 //
 // Provide grammar of PCRE (Perl Compatible Regular Expression)for the LL(k)
-// parser. More informations at http://pcre.org/pcre.txt, sections pcrepattern &
-// pcresyntax.
+// parser. More information at http://pcre.org/pcre.txt, sections pcre pattern &
+// pcre syntax.
 //
 // @copyright  Copyright © 2007-2017 Hoa community.
 // @license    New BSD License

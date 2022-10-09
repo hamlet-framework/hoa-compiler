@@ -49,8 +49,8 @@ final class Parser
     private int $depth = -1;
 
     public function __construct(
-        private Grammar $grammar,
-        private Rules $rules,
+        private readonly Grammar $grammar,
+        private readonly Rules $rules,
     ) {
     }
 

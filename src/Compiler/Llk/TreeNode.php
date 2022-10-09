@@ -22,8 +22,8 @@ final class TreeNode implements Element
      * @param ?TreeNode $parent
      */
     public function __construct(
-        private string $id,
-        private ?array $value = null,
+        private readonly string $id,
+        private readonly ?array $value = null,
         private array $children = [],
         private ?TreeNode $parent = null
     ) {

@@ -212,7 +212,7 @@ abstract class Llk
 
             // Parse instructions: pragmas, skips and tokens
             if (str_starts_with($line, '%')) {
-                if (preg_match('#^%pragma\h+([^\h]+)\h+(.*)$#u', $line, $matches) !== 0) {
+                if (preg_match('#^%pragma\h+(\H+)\h+(.*)$#u', $line, $matches) !== 0) {
                     switch ($matches[2]) {
                         case 'true':
                             $pragmaValue = true;
@@ -228,7 +228,7 @@ abstract class Llk
                             }
                     }
                     $pragmas[$matches[1]] = $pragmaValue;
-                } elseif (preg_match('#^%skip\h+(?:([^:]+):)?([^\h]+)\h+(.*)$#u', $line, $matches) !== 0) {
+                } elseif (preg_match('#^%skip\h+(?:([^:]+):)?(\H+)\h+(.*)$#u', $line, $matches) !== 0) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }
@@ -240,7 +240,7 @@ abstract class Llk
                     } else {
                         $tokens[$matches[1]]['skip'] = '(?:' . $tokens[$matches[1]]['skip'] . '|' . $matches[3] . ')';
                     }
-                } elseif (preg_match('#^%token\h+(?:([^:]+):)?([^\h]+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches) !== 0) {
+                } elseif (preg_match('#^%token\h+(?:([^:]+):)?(\H+)\h+(.*?)(?:\h+->\h+(.*))?$#u', $line, $matches) !== 0) {
                     if (empty($matches[1])) {
                         $matches[1] = 'default';
                     }

@@ -10,9 +10,9 @@ class Grammar
      * @param array<string,bool|int|string> $pragmas
      */
     public function __construct(
-        private array $tokens,
-        private array $rawRules,
-        private array $pragmas,
+        private readonly array $tokens,
+        private readonly array $rawRules,
+        private readonly array $pragmas,
     ) {
     }
 

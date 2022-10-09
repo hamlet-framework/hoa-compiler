@@ -9,7 +9,6 @@ use SplDoublyLinkedList;
  * @template I
  * @template T
  * @implements Iterator<I,T>
- * @todo rewtite this code as this is rather shit
  */
 final class Buffer implements Iterator
 {
@@ -29,7 +28,7 @@ final class Buffer implements Iterator
      * @param int $bufferSize
      * @psalm-suppress MixedPropertyTypeCoercion
      */
-    public function __construct(private Iterator $iterator, int $bufferSize)
+    public function __construct(private readonly Iterator $iterator, int $bufferSize)
     {
         $this->bufferSize = max($bufferSize, 1);
         $this->buffer = new SplDoublyLinkedList;

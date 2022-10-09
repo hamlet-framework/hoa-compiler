@@ -45,7 +45,7 @@ final class RuleAnalyzer
      */
     private RuleCounter $ruleCounter;
 
-    public function __construct(private Grammar $grammar)
+    public function __construct(private readonly Grammar $grammar)
     {
         $this->ruleCounter = new RuleCounter;
     }

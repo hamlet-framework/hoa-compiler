@@ -32,7 +32,7 @@ final class Lookahead implements Iterator
     /**
      * @param Iterator<I,T> $iterator
      */
-    public function __construct(private Iterator $iterator)
+    public function __construct(private readonly Iterator $iterator)
     {
     }
 
